@@ -1,0 +1,63 @@
+global:
+  cloud_storage_provider: ${cloud_storage_provider}
+  cloud_storage_region: ${aws_region}
+  public_container_name: ${aws_s3_public_bucket}
+  private_container_name: ${aws_s3_private_bucket}
+  dial_state_container_public: ${aws_s3_dial_bucket}
+  velero_container_name: ${aws_s3_velero_bucket}
+  private_ingressgateway_ip: ${private_ingressgateway_ip}
+  encryption__string: ${encryption_string}
+  random_string: ${random_string}
+  
+  serviceAccount:
+    create: true
+    name: sunbird-sa
+    annotations:
+      eks.amazonaws.com/role-arn: ${sunbird_sa_role_arn}
+
+velero:
+  enabled: true
+  serviceAccount:
+    server:
+      create: true
+      name: velero-sa
+      annotations:
+        eks.amazonaws.com/role-arn: ${velero_sa_role_arn}
+  configuration:
+    provider: aws
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: "${aws_s3_velero_bucket}"
+        config:
+          region: ${aws_region}
+    dbbackupStorageLocation:
+      - name: dbbackup
+        provider: aws
+        bucket: "${aws_s3_velero_bucket}"
+        config:
+          prefix: db_backups
+          region: ${aws_region}
+    backupSyncPeriod: 15m
+    volumeSnapshotLocation:
+      - name: default
+        provider: aws
+        config:
+          region: ${aws_region}
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.9.0
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+
+spark:
+  serviceAccount:
+    create: false
+    name: "sunbird-sa"
+
+nginx-public-ingress:
+  commonAnnotations:
+    reloader.stakater.com/auto: "true"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
