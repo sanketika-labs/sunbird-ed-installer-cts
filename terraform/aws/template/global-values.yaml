@@ -36,9 +36,9 @@ kong:
   kong_pg_password: *postgresql-password
 
 global:
-  building_block: "" # Building block name
-  env: "" # Short environment name
-  environment: "" # Environment name (1-9 lowercase alphanumeric characters)
+  building_block: "sb-cts" # Building block name
+  env: "dev" # Short environment name
+  environment: "dev" # Environment name (1-9 lowercase alphanumeric characters)
   release_version: "release-7.0.0"
   
   # AWS-specific configuration
@@ -46,19 +46,17 @@ global:
   cloud_service_provider: "aws"
   sunbird_cloud_storage_provider: "aws"
   checkpoint_store_type: "s3"
-  cloud_storage_region: "" # e.g., us-east-1
-  aws_account_id: ""
-  
+  cloud_storage_region: "ap-south-1" # e.g., us-east-1
   # Network configuration (optional - set create_network: false if using existing VPC)
   create_network: "true"
   # vpc_id: "" # If create_network: false, provide existing VPC ID
   # private_subnet_ids: [] # If create_network: false
   # public_subnet_ids: []  # If create_network: false
-  
+
   # EKS configuration
   eks_cluster_version: "1.28"
-  eks_node_instance_type: "t3.medium"
-  eks_node_disk_size_gb: 100
+  eks_node_instance_type: "t3.micro"
+  eks_node_disk_size_gb: 30
   eks_node_count_min: 1
   eks_node_count_max: 2
   
@@ -71,7 +69,7 @@ global:
   # DNS (optional)
   manage_dns: false
   # route53_zone_id: "Z1234567890ABC"
-  
+
   # Domain configuration
   domain: "REPLACE_ME" # e.g., sunbird.example.com
   

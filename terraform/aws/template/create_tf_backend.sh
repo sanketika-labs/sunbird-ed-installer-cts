@@ -26,9 +26,9 @@ if ! aws sts get-caller-identity &> /dev/null; then
 fi
 
 # Read values from global-values.yaml
-building_block=$(yq '.global.building_block' global-values.yaml)
-environment_name=$(yq '.global.environment' global-values.yaml)
-aws_region=$(yq '.global.cloud_storage_region' global-values.yaml)
+building_block=$(yq -r '.global.building_block' global-values.yaml)
+environment_name=$(yq -r '.global.environment' global-values.yaml)
+aws_region=$(yq -r '.global.cloud_storage_region' global-values.yaml)
 
 # Validate required values
 if [[ -z "$building_block" || -z "$environment_name" || -z "$aws_region" ]]; then
@@ -43,11 +43,11 @@ if ! [[ "$environment_name" =~ ^[a-z0-9]{1,9}$ ]]; then
   exit 1
 fi
 
-# Construct resource names
-BUCKET_NAME="${environment_name}tfstate"
-
 # Get AWS Account ID
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+# Construct resource names with account ID for global uniqueness
+BUCKET_NAME="${environment_name}-tfstate-${AWS_ACCOUNT_ID}"
 
 echo "======================================"
 echo "AWS Terraform Backend Setup"
@@ -59,58 +59,76 @@ echo "AWS Account: $AWS_ACCOUNT_ID"
 echo "S3 Bucket: $BUCKET_NAME"
 echo "======================================"
 
-# Create S3 bucket for Terraform state
-if aws s3 ls "s3://$BUCKET_NAME" 2>&1 | grep -q 'NoSuchBucket'; then
+# Check whether the bucket exists and is accessible
+if aws s3api head-bucket --bucket "$BUCKET_NAME" --region "$aws_region" >/dev/null 2>&1; then
   echo ""
-  echo "Creating S3 bucket for Terraform state..."
-  
-  # Handle us-east-1 special case (doesn't need LocationConstraint)
-  if [ "$aws_region" = "us-east-1" ]; then
-    aws s3api create-bucket \
-      --bucket "$BUCKET_NAME" \
-      --region "$aws_region"
-  else
-    aws s3api create-bucket \
-      --bucket "$BUCKET_NAME" \
-      --region "$aws_region" \
-      --create-bucket-configuration LocationConstraint="$aws_region"
-  fi
-  
-  # Enable versioning
-  echo "Enabling versioning on S3 bucket..."
-  aws s3api put-bucket-versioning \
-    --bucket "$BUCKET_NAME" \
-    --versioning-configuration Status=Enabled
-  
-  # Enable server-side encryption
-  echo "Enabling encryption on S3 bucket..."
-  aws s3api put-bucket-encryption \
-    --bucket "$BUCKET_NAME" \
-    --server-side-encryption-configuration '{
-      "Rules": [{
-        "ApplyServerSideEncryptionByDefault": {
-          "SSEAlgorithm": "AES256"
-        },
-        "BucketKeyEnabled": true
-      }]
-    }'
-  
-  # Block public access
-  echo "Blocking public access to S3 bucket..."
-  aws s3api put-public-access-block \
-    --bucket "$BUCKET_NAME" \
-    --public-access-block-configuration \
-      "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
-  
-  # Add bucket tagging
-  aws s3api put-bucket-tagging \
-    --bucket "$BUCKET_NAME" \
-    --tagging "TagSet=[{Key=Environment,Value=$environment_name},{Key=BuildingBlock,Value=$building_block},{Key=ManagedBy,Value=Terraform},{Key=Purpose,Value=TerraformState}]"
-  
-  echo "✓ S3 bucket $BUCKET_NAME created successfully"
+  echo "✓ S3 bucket $BUCKET_NAME already exists and is accessible"
 else
-  echo ""
-  echo "✓ S3 bucket $BUCKET_NAME already exists"
+  # If head-bucket failed, inspect the error to give a clearer message
+  set +e
+  ERR_OUT=$(aws s3api head-bucket --bucket "$BUCKET_NAME" --region "$aws_region" 2>&1)
+  ERR_CODE=$?
+  set -e
+
+  if echo "$ERR_OUT" | grep -qi 'Not Found\|NoSuchBucket'; then
+    echo ""
+    echo "Creating S3 bucket for Terraform state..."
+    # Handle us-east-1 special case (doesn't need LocationConstraint)
+    if [ "$aws_region" = "us-east-1" ]; then
+      aws s3api create-bucket \
+        --bucket "$BUCKET_NAME" \
+        --region "$aws_region"
+    else
+      aws s3api create-bucket \
+        --bucket "$BUCKET_NAME" \
+        --region "$aws_region" \
+        --create-bucket-configuration LocationConstraint="$aws_region"
+    fi
+
+    # Enable versioning
+    echo "Enabling versioning on S3 bucket..."
+    aws s3api put-bucket-versioning \
+      --bucket "$BUCKET_NAME" \
+      --versioning-configuration Status=Enabled
+
+    # Enable server-side encryption
+    echo "Enabling encryption on S3 bucket..."
+    aws s3api put-bucket-encryption \
+      --bucket "$BUCKET_NAME" \
+      --server-side-encryption-configuration '{
+        "Rules": [{
+          "ApplyServerSideEncryptionByDefault": {
+            "SSEAlgorithm": "AES256"
+          },
+          "BucketKeyEnabled": true
+        }]
+      }'
+
+    # Block public access
+    echo "Blocking public access to S3 bucket..."
+    aws s3api put-public-access-block \
+      --bucket "$BUCKET_NAME" \
+      --public-access-block-configuration \
+        "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+
+    # Add bucket tagging
+    aws s3api put-bucket-tagging \
+      --bucket "$BUCKET_NAME" \
+      --tagging "TagSet=[{Key=Environment,Value=$environment_name},{Key=BuildingBlock,Value=$building_block},{Key=ManagedBy,Value=Terraform},{Key=Purpose,Value=TerraformState}]"
+
+    echo "✓ S3 bucket $BUCKET_NAME created successfully"
+  else
+    # Common alternative errors: bucket exists in another account, access denied, or region mismatch
+    echo ""
+    echo "ERROR: Unable to access bucket $BUCKET_NAME: $ERR_OUT"
+    echo "Possible causes:"
+    echo "- The bucket exists but in another AWS account"
+    echo "- You don't have permissions to access the bucket"
+    echo "- The bucket exists in a different region"
+    echo ""
+    echo "If the bucket exists in another account, either choose a different bucket name or ensure the account has shared access."
+    exit 1
+  fi
 fi
 
 # Export environment variables to tf.sh

@@ -7,7 +7,6 @@ terraform {
     bucket         = "${get_env("TERRAFORM_BACKEND_BUCKET")}"
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = "${get_env("AWS_REGION")}"
-    dynamodb_table = "${get_env("TERRAFORM_BACKEND_DYNAMODB_TABLE")}"
     encrypt        = true
   }
 }
