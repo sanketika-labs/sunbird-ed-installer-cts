@@ -10,118 +10,146 @@ locals {
   }
 }
 
-# EKS Module using terraform-aws-modules/eks
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
-  
-  cluster_name    = local.cluster_name
-  cluster_version = var.cluster_version
-  
-  vpc_id                    = var.vpc_id
-  subnet_ids                = var.private_subnet_ids
-  control_plane_subnet_ids  = var.private_subnet_ids
-  
-  # Cluster endpoint access
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
-  
-  # Enable IRSA (IAM Roles for Service Accounts)
-  enable_irsa = true
-  
-  # Cluster addons
-  cluster_addons = {
-    coredns = {
-      most_recent = true
+# -------------------------------
+# IAM roles and policies
+# -------------------------------
+
+data "aws_iam_policy_document" "eks_cluster_assume_role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
     }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-    aws-ebs-csi-driver = {
-      most_recent              = true
-      service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
-    }
+    actions = ["sts:AssumeRole"]
   }
-  
-  # EKS Managed Node Group
-  eks_managed_node_groups = {
-    default = {
-      name            = "${local.cluster_name}-node-group"
-      use_name_prefix = true
-      
-      min_size     = var.node_count_min
-      max_size     = var.node_count_max
-      desired_size = var.node_count_min
-      
-      instance_types = [var.node_instance_type]
-      capacity_type  = "ON_DEMAND"
-      
-      disk_size = var.node_disk_size_gb
-      
-      labels = {
-        Environment   = var.environment
-        BuildingBlock = var.building_block
-      }
-      
-      tags = merge(
-        local.common_tags,
-        {
-          Name = "${local.cluster_name}-node-group"
-        }
-      )
-    }
-  }
-  
-  # Cluster security group
-  cluster_security_group_additional_rules = {
-    ingress_nodes_ephemeral_ports_tcp = {
-      description                = "Nodes on ephemeral ports"
-      protocol                   = "tcp"
-      from_port                  = 1025
-      to_port                    = 65535
-      type                       = "ingress"
-      source_node_security_group = true
-    }
-  }
-  
-  # Node security group
-  node_security_group_additional_rules = {
-    ingress_self_all = {
-      description = "Node to node all ports/protocols"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 0
-      type        = "ingress"
-      self        = true
-    }
-    
-    ingress_cluster_all = {
-      description                   = "Cluster to node all ports/protocols"
-      protocol                      = "-1"
-      from_port                     = 0
-      to_port                       = 0
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    
-    egress_all = {
-      description      = "Node all egress"
-      protocol         = "-1"
-      from_port        = 0
-      to_port          = 0
-      type             = "egress"
-      cidr_blocks      = ["0.0.0.0/0"]
-      ipv6_cidr_blocks = ["::/0"]
-    }
-  }
-  
+}
+
+resource "aws_iam_role" "eks_cluster" {
+  name               = "${var.building_block}-${var.environment}-eks-cluster-role"
+  assume_role_policy = data.aws_iam_policy_document.eks_cluster_assume_role.json
+
   tags = local.common_tags
 }
 
-# IAM role for EBS CSI Driver
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
+  role       = aws_iam_role.eks_cluster.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSServicePolicy" {
+  role       = aws_iam_role.eks_cluster.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+}
+
+data "aws_iam_policy_document" "eks_node_assume_role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "eks_node" {
+  name               = "${var.building_block}-${var.environment}-eks-node-role"
+  assume_role_policy = data.aws_iam_policy_document.eks_node_assume_role.json
+
+  tags = local.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
+  role       = aws_iam_role.eks_node.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+}
+
+# -------------------------------
+# EKS Cluster
+# -------------------------------
+
+resource "aws_eks_cluster" "cluster" {
+  name     = local.cluster_name
+  version  = "1.29"
+  role_arn = aws_iam_role.eks_cluster.arn
+
+  vpc_config {
+    subnet_ids = var.public_subnet_ids
+    endpoint_public_access  = true
+    endpoint_private_access = false
+  }
+
+  tags = merge(local.common_tags, { Name = local.cluster_name })
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_cluster_AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.eks_cluster_AmazonEKSServicePolicy
+  ]
+}
+
+# -------------------------------
+# OIDC provider for IRSA
+# -------------------------------
+
+# The TLS data source returns cert information for the OIDC issuer.
+data "tls_certificate" "oidc" {
+  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "oidc" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.oidc.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+}
+
+# -------------------------------
+# EKS Managed Node Group
+# -------------------------------
+
+resource "aws_eks_node_group" "default" {
+  cluster_name    = aws_eks_cluster.cluster.name
+  node_group_name = "${local.cluster_name}-node-group"
+  node_role_arn   = aws_iam_role.eks_node.arn
+  subnet_ids      = var.public_subnet_ids
+
+  scaling_config {
+    desired_size = var.node_count_min
+    min_size     = var.node_count_min
+    max_size     = var.node_count_max
+  }
+
+  instance_types = [var.node_instance_type]
+  disk_size      = var.node_disk_size_gb
+
+  tags = merge(
+    local.common_tags,
+    { Name = "${local.cluster_name}-node" }
+  )
+
+  depends_on = [
+    aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly,
+    aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
+    aws_iam_openid_connect_provider.oidc
+  ]
+}
+
+# -------------------------------
+# EBS CSI Driver IRSA role (reuse existing module)
+# module expects an OIDC provider ARN
+# -------------------------------
+
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.0"
@@ -132,7 +160,7 @@ module "ebs_csi_driver_irsa" {
   
   oidc_providers = {
     main = {
-      provider_arn               = module.eks.oidc_provider_arn
+      provider_arn               = aws_iam_openid_connect_provider.oidc.arn
       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
     }
   }
@@ -140,17 +168,20 @@ module "ebs_csi_driver_irsa" {
   tags = local.common_tags
 }
 
-# Update kubeconfig
+# -------------------------------
+# kubeconfig updater (local-exec)
+# -------------------------------
+
 resource "null_resource" "update_kubeconfig" {
   triggers = {
-    cluster_endpoint = module.eks.cluster_endpoint
+    cluster_endpoint = aws_eks_cluster.cluster.endpoint
   }
   
   provisioner "local-exec" {
-    command = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
+    command = "aws eks update-kubeconfig --region ${var.aws_region} --name ${aws_eks_cluster.cluster.name}"
   }
   
-  depends_on = [module.eks]
+  depends_on = [aws_eks_cluster.cluster]
 }
 
 # Create internal load balancer for private ingress
@@ -179,5 +210,5 @@ resource "kubernetes_service" "private_lb_placeholder" {
     }
   }
   
-  depends_on = [module.eks]
+  depends_on = [aws_eks_cluster.cluster, aws_eks_node_group.default]
 }

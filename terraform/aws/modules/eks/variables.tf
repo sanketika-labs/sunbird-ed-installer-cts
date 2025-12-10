@@ -18,13 +18,8 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "private_subnet_ids" {
-  description = "Private subnet IDs for EKS cluster"
-  type        = list(string)
-}
-
 variable "public_subnet_ids" {
-  description = "Public subnet IDs for load balancers"
+  description = "Public subnet IDs for EKS cluster and load balancers"
   type        = list(string)
 }
 
@@ -37,23 +32,23 @@ variable "cluster_version" {
 variable "node_instance_type" {
   description = "EC2 instance type for worker nodes"
   type        = string
-  default     = "m5a.12xlarge"
+  default     = "t3.medium"
 }
 
 variable "node_disk_size_gb" {
   description = "Disk size for worker nodes in GB"
   type        = number
-  default     = 100
+  default     = 30
 }
 
 variable "node_count_min" {
   description = "Minimum number of worker nodes"
   type        = number
-  default     = 0
+  default     = 1
 }
 
 variable "node_count_max" {
   description = "Maximum number of worker nodes"
   type        = number
-  default     = 1
+  default     = 3
 }

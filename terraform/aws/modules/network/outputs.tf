@@ -1,24 +1,24 @@
 output "vpc_id" {
   description = "VPC ID"
-  value       = var.create_network == "true" ? module.vpc[0].vpc_id : data.aws_vpc.existing[0].id
-}
-
-output "private_subnet_ids" {
-  description = "Private subnet IDs"
-  value       = var.create_network == "true" ? module.vpc[0].private_subnets : data.aws_subnets.existing_private[0].ids
+  value       = var.create_network == "true" ? aws_vpc.vpc[0].id : data.aws_vpc.existing[0].id
 }
 
 output "public_subnet_ids" {
-  description = "Public subnet IDs"
-  value       = var.create_network == "true" ? module.vpc[0].public_subnets : data.aws_subnets.existing_public[0].ids
+  description = "List of IDs of public subnets"
+  value       = aws_subnet.public.*.id
 }
 
 output "vpc_cidr_block" {
   description = "VPC CIDR block"
-  value       = var.create_network == "true" ? module.vpc[0].vpc_cidr_block : data.aws_vpc.existing[0].cidr_block
+  value       = var.create_network == "true" ? aws_vpc.vpc[0].cidr_block : data.aws_vpc.existing[0].cidr_block
 }
 
-output "nat_gateway_ids" {
-  description = "NAT Gateway IDs"
-  value       = var.create_network == "true" ? module.vpc[0].natgw_ids : []
+output "internet_gateway_id" {
+  description = "Internet Gateway ID"
+  value       = var.create_network == "true" ? aws_internet_gateway.igw[0].id : ""
+}
+
+output "public_route_table_id" {
+  description = "Public Route Table ID"
+  value       = var.create_network == "true" ? aws_route_table.public[0].id : ""
 }
