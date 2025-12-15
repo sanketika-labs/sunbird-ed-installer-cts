@@ -75,6 +75,7 @@ serviceAccount:
 #   honorLabels: true
 #   jobLabel: "app.kubernetes.io/name"
 serviceMonitor: &serviceMonitor
+  enabled: false
   jobmanager:
     enabled: true
     interval: 30s
