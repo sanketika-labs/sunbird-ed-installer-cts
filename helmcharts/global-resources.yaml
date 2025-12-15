@@ -537,7 +537,7 @@ kube-prometheus-stack:
                 storage: 25Gi
       resources:
         requests:
-          cpu: 500m"
+          cpu: 500m
           memory: "1Gi"
         limits:
           cpu: "1"
