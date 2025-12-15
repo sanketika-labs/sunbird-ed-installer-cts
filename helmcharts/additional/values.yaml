@@ -66,18 +66,18 @@ volume-autoscaler:
   scale_up_max_size: ""     
 
 nlwebflink:
-  enabled: false
+  enabled: true
   namespace: nlweb
   image:
     repository: sunbirded.azurecr.io/flink-nlweb
     tag: 0.0.1
   kafka:
-    topic: {{ .Values.global.env }}.nlweb.ingest
+    topic: "{{ .Values.global.env }}.nlweb.ingest"
     bootstrapServers: kafka.sunbird.svc.cluster.local:9092  
 
 
 nlweb:
-  enabled: false
+  enabled: true
   namespace: nlweb
   image:
     repository: sanketikahub/nlweb

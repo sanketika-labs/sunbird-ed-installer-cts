@@ -32,7 +32,7 @@ function create_tf_resources() {
     chmod 600 ~/.kube/config
 }
 function certificate_keys() {
-     #  # If keys already present in global-values.yaml → skip writing
+    #  # If keys already present in global-values.yaml → skip writing
     if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../terraform/azure/$environment/global-values.yaml 2>/dev/null; then
         echo "Certificate keys already present — skipping generation and write."
         return

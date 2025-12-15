@@ -1,8 +1,9 @@
+{{- if .Values.serviceMonitor.enabled }}
 {{- $currentScope := .}}
 {{- range $jobName, $jobData := .Values.flink_jobs }}
-{{- range $key, $smData := $jobData.serviceMonitor }}
 {{- if $jobData.enabled}}
-{{- if $smData.enabled}}
+{{- range $key, $smData := $jobData.serviceMonitor }}
+{{- if and (ne $key "enabled") $smData.enabled }}
 {{- with $currentScope }}
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -28,6 +29,7 @@ spec:
     interval: {{ $smData.interval }}
     scrapeTimeout: {{ $smData.scrapeTimeout }}
     honorLabels: {{ $smData.honorLabels }}
+{{- end}}
 {{- end}}
 {{- end}}
 {{- end}}

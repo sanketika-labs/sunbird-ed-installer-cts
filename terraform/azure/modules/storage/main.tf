@@ -44,8 +44,9 @@ resource "azurerm_storage_account" "storage_account" {
       max_age_in_seconds = 200
       allowed_origins    = ["*"]
       allowed_methods    = ["GET", "HEAD", "OPTIONS", "PUT"]
-      exposed_headers    = ["*"]
-      allowed_headers    = ["*"]
+      exposed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods"]
+      allowed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Method", "Origin", "x-ms-meta-qq", "x-ms-blob-type", "x-ms-blob-content-type", "Content-Type"]
+
     }
   }
   tags = merge(
