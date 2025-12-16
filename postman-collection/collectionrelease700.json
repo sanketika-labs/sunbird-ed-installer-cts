@@ -6187,7 +6187,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"request\": \n{\n            \"type\": \"forum\",\n            \"subType\": \"group\",\n            \"action\": \"create\",\n            \"component\": \"*\",\n            \"framework\": \"*\",\n            \"data\": {\n                \"templateName\": \"defaultTemplate\",\n                \"action\": \"create\",\n                \"fields\": [\n                    {\n                        \"category\": {\n                            \"name\": \"Discussion Forum for Groups\",\n                            \"pid\": \"6\",\n                            \"uid\": \"1\",\n                            \"description\": \"\",\n                            \"context\": [\n                                {\n                                    \"type\": \"group\",\n                                    \"identifier\": \"_groupId\"\n                                }\n                            ]\n                        }\n                    }\n                ]\n            },\n            \"rootOrgId\": \"*\"\n        }\n}"
+									"raw": "{\n  \"request\": \n{\n            \"type\": \"forum\",\n            \"subType\": \"group\",\n            \"action\": \"create\",\n            \"component\": \"*\",\n            \"framework\": \"*\",\n            \"data\": {\n                \"templateName\": \"defaultTemplate\",\n                \"action\": \"create\",\n                \"fields\": [\n                    {\n                        \"category\": {\n                            \"name\": \"Discussion Forum for Groups\",\n                            \"pid\": \"2\",\n                            \"uid\": \"1\",\n                            \"description\": \"\",\n                            \"context\": [\n                                {\n                                    \"type\": \"group\",\n                                    \"identifier\": \"_groupId\"\n                                }\n                            ]\n                        }\n                    }\n                ]\n            },\n            \"rootOrgId\": \"*\"\n        }\n}"
 								},
 								"url": "{{host}}/api/data/v1/form/create"
 							},
@@ -6910,6 +6910,28 @@
 											"language": "json"
 										}
 									}
+								},
+								"url": "{{host}}/api/data/v1/form/create"
+							},
+							"response": []
+						},
+						{
+							"name": "36 - Batch Form",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": \n{\n            \"type\": \"forum\",\n            \"subType\": \"batch\",\n            \"action\": \"create\",\n            \"component\": \"*\",\n            \"framework\": \"*\",\n            \"data\": {\n                \"templateName\": \"batch_create\",\n                \"action\": \"create\",\n                \"fields\": [\n                    {\n                        \"category\": {\n                            \"name\": \"General Discussion\",\n                            \"pid\": \"2\",\n                            \"uid\": \"1\",\n                            \"description\": \"\",\n                            \"context\": [\n                                {\n                                    \"type\": \"batch\",\n                                    \"identifier\": \"_batchId\"\n                                }\n                            ]\n                        }\n                    }\n                ]\n            },\n            \"rootOrgId\": \"*\"\n        }\n}"
 								},
 								"url": "{{host}}/api/data/v1/form/create"
 							},
