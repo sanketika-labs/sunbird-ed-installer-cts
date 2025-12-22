@@ -1,2 +1,0 @@
-export AWS_REGION=ap-south-1
-export TERRAFORM_BACKEND_BUCKET=dev-tfstate-725876873105

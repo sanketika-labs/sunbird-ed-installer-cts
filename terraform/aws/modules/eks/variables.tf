@@ -52,3 +52,9 @@ variable "node_count_max" {
   type        = number
   default     = 3
 }
+
+variable "private_ingressgateway_ip" {
+    type        = string
+    description = "Nginx private ingress ip."
+    default = "10.0.0.10"
+}

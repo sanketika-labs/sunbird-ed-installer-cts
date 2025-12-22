@@ -185,30 +185,30 @@ resource "null_resource" "update_kubeconfig" {
 }
 
 # Create internal load balancer for private ingress
-resource "kubernetes_service" "private_lb_placeholder" {
-  metadata {
-    name      = "private-lb-placeholder"
-    namespace = "default"
-    annotations = {
-      "service.beta.kubernetes.io/aws-load-balancer-type"                              = "nlb"
-      "service.beta.kubernetes.io/aws-load-balancer-internal"                          = "true"
-      "service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled" = "true"
-    }
-  }
+# resource "kubernetes_service" "private_lb_placeholder" {
+#   metadata {
+#     name      = "private-lb-placeholder"
+#     namespace = "default"
+#     annotations = {
+#       "service.beta.kubernetes.io/aws-load-balancer-type"                              = "nlb"
+#       "service.beta.kubernetes.io/aws-load-balancer-internal"                          = "true"
+#       "service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled" = "true"
+#     }
+#   }
   
-  spec {
-    type = "LoadBalancer"
+#   spec {
+#     type = "LoadBalancer"
     
-    port {
-      port        = 80
-      target_port = 80
-      protocol    = "TCP"
-    }
+#     port {
+#       port        = 80
+#       target_port = 80
+#       protocol    = "TCP"
+#     }
     
-    selector = {
-      app = "private-lb-placeholder"
-    }
-  }
+#     selector = {
+#       app = "private-lb-placeholder"
+#     }
+#   }
   
-  depends_on = [aws_eks_cluster.cluster, aws_eks_node_group.default]
-}
+#   depends_on = [aws_eks_cluster.cluster, aws_eks_node_group.default]
+# }

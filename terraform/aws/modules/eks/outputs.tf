@@ -44,7 +44,7 @@ output "node_role_arn" {
   value       = aws_iam_role.eks_node.arn
 }
 
-# output "private_lb_ip" {
-#   description = "Private load balancer IP"
-#   value       = try(kubernetes_service.private_lb_placeholder.status[0].load_balancer[0].ingress[0].hostname, "")
-# }
+output "private_lb_ip" {
+  description = "Private load balancer IP"
+  value       = var.private_ingressgateway_ip
+}
