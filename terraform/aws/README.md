@@ -1,6 +1,8 @@
 # Sunbird ED AWS Installer
 
-This directory contains Terraform and Terragrunt configurations for deploying Sunbird ED on AWS using EKS (Elastic Kubernetes Service).
+This directory contains OpenTofu and Terragrunt configurations for deploying Sunbird ED on AWS using EKS (Elastic Kubernetes Service).
+
+> **Note**: This installer uses [OpenTofu](https://opentofu.org), an open-source fork of Terraform maintained by the Linux Foundation. OpenTofu is fully compatible with Terraform 1.6.x and uses the same HCL syntax. For migration details, see [OPENTOFU_MIGRATION.md](OPENTOFU_MIGRATION.md).
 
 ## Architecture Overview
 
@@ -15,7 +17,7 @@ The installation creates the following AWS resources:
   - Velero bucket for backups
 - **IAM Roles**: IRSA (IAM Roles for Service Accounts) for Sunbird and Velero
 - **Load Balancers**: Network Load Balancers for public and private ingress
-- **State Backend**: S3 bucket and DynamoDB table for Terraform state
+- **State Backend**: S3 bucket and DynamoDB table for OpenTofu state
 
 ## Prerequisites
 
@@ -32,12 +34,16 @@ The installation creates the following AWS resources:
    aws configure
    ```
 
-2. **Terraform** (>= 1.3)
+2. **OpenTofu** (>= 1.6.0)
    ```bash
-   # Install Terraform
-   wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
-   unzip terraform_1.6.6_linux_amd64.zip
-   sudo mv terraform /usr/local/bin/
+   # Install OpenTofu
+   curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+   chmod +x install-opentofu.sh
+   sudo ./install-opentofu.sh --install-method standalone
+   rm install-opentofu.sh
+   
+   # Verify installation
+   tofu --version
    ```
 
 3. **Terragrunt** (>= 0.45)
@@ -79,6 +85,17 @@ The installation creates the following AWS resources:
    ```bash
    sudo npm install -g newman
    ```
+
+### Verify Installation
+
+After installing the required tools, verify your setup:
+
+```bash
+cd terraform/aws
+./verify-opentofu-setup.sh
+```
+
+This script checks all dependencies and provides installation instructions for missing tools.
 
 ### AWS IAM Permissions
 
@@ -181,7 +198,7 @@ Run the complete installation with:
 ```
 
 This will:
-1. Create S3 bucket and DynamoDB table for Terraform state
+1. Create S3 bucket and DynamoDB table for OpenTofu state
 2. Backup existing kubeconfig
 3. Create AWS infrastructure (VPC, EKS, S3, IAM)
 4. Install Helm components (monitoring, edbb, learnbb, etc.)
@@ -194,7 +211,7 @@ This will:
 For more control, run individual steps:
 
 ```bash
-# 1. Create Terraform backend
+# 1. Create OpenTofu backend
 ./install.sh create_tf_backend
 source tf.sh
 
@@ -316,7 +333,7 @@ Backups are stored in the Velero S3 bucket.
 
 ## Troubleshooting
 
-### Check Terraform State
+### Check OpenTofu State
 
 ```bash
 source tf.sh
@@ -415,6 +432,20 @@ Approximate monthly costs for AWS resources:
 | **Database** | Cloud SQL | RDS |
 | **File Upload** | `gsutil cp` | `aws s3 cp` |
 | **Load Balancer** | GCE LB | Network Load Balancer |
+
+## OpenTofu vs Terraform
+
+This installer is designed for OpenTofu but remains compatible with Terraform 1.6+:
+
+| Feature | OpenTofu | Terraform |
+|---------|----------|-----------|
+| **License** | MPL 2.0 (Open Source) | BSL (Business Source) |
+| **Compatibility** | Fully compatible | Works with same code |
+| **Command** | `tofu` | `terraform` |
+| **State Format** | Same as Terraform | Same as OpenTofu |
+| **Providers** | Same registry | Same registry |
+
+For migration details, see [OPENTOFU_MIGRATION.md](OPENTOFU_MIGRATION.md).
 
 ## Support
 
