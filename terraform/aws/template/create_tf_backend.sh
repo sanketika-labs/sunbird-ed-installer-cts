@@ -50,7 +50,7 @@ AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 BUCKET_NAME="${environment_name}-tfstate-${AWS_ACCOUNT_ID}"
 
 echo "======================================"
-echo "AWS Terraform Backend Setup"
+echo "AWS OpenTofu Backend Setup"
 echo "======================================"
 echo "Building block: $building_block"
 echo "Environment: $environment_name"
@@ -72,7 +72,7 @@ else
 
   if echo "$ERR_OUT" | grep -qi 'Not Found\|NoSuchBucket'; then
     echo ""
-    echo "Creating S3 bucket for Terraform state..."
+    echo "Creating S3 bucket for OpenTofu state..."
     # Handle us-east-1 special case (doesn't need LocationConstraint)
     if [ "$aws_region" = "us-east-1" ]; then
       aws s3api create-bucket \
@@ -114,7 +114,7 @@ else
     # Add bucket tagging
     aws s3api put-bucket-tagging \
       --bucket "$BUCKET_NAME" \
-      --tagging "TagSet=[{Key=Environment,Value=$environment_name},{Key=BuildingBlock,Value=$building_block},{Key=ManagedBy,Value=Terraform},{Key=Purpose,Value=TerraformState}]"
+      --tagging "TagSet=[{Key=Environment,Value=$environment_name},{Key=BuildingBlock,Value=$building_block},{Key=ManagedBy,Value=OpenTofu},{Key=Purpose,Value=OpenTofuState}]"
 
     echo "✓ S3 bucket $BUCKET_NAME created successfully"
   else
@@ -139,7 +139,7 @@ EOF
 
 echo ""
 echo "======================================"
-echo "✓ Terraform backend setup complete!"
+echo "✓ OpenTofu backend setup complete!"
 echo "======================================"
 echo ""
 echo "Next steps:"
