@@ -11,6 +11,8 @@ global:
   private_ingressgateway_ip: ${private_ingressgateway_ip}
   encryption_string: ${encryption_string}
   random_string: ${random_string}
+  storage_class: gp3
+  irsa_role_arn: ${sunbird_sa_role_arn}
   
   serviceAccount:
     create: true
