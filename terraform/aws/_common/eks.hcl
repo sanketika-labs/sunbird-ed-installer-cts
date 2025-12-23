@@ -14,7 +14,6 @@ dependency "network" {
   config_path = "../network"
   mock_outputs = {
     vpc_id              = "vpc-dummy"
-    private_subnet_ids  = ["subnet-dummy-1", "subnet-dummy-2"]
     public_subnet_ids   = ["subnet-dummy-3", "subnet-dummy-4"]
   }
 }
@@ -24,7 +23,6 @@ inputs = {
   building_block          = local.building_block
   aws_region              = local.aws_region
   vpc_id                  = dependency.network.outputs.vpc_id
-  private_subnet_ids      = dependency.network.outputs.private_subnet_ids
   public_subnet_ids       = dependency.network.outputs.public_subnet_ids
   cluster_version         = local.eks_cluster_version
   node_instance_type      = lookup(local.global_vars.global, "eks_node_instance_type", "m5.2xlarge")
