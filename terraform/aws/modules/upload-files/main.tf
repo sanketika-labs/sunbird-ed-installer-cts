@@ -6,7 +6,7 @@ resource "null_resource" "copy_from_sunbird_artifacts" {
   provisioner "local-exec" {
     command = <<EOT
       aws s3 sync \
-        s3://${var.sunbird_public_artifacts_bucket}/${var.sunbird_public_artifacts_prefix} \
+        s3://${var.sunbird_public_artifacts_bucket}/artifacts \
         s3://${var.storage_bucket_public}/ \
         --no-progress \
         --exclude "*.terragrunt-source-manifest" \
