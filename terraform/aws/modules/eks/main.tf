@@ -184,6 +184,34 @@ resource "null_resource" "update_kubeconfig" {
   depends_on = [aws_eks_cluster.cluster]
 }
 
+# -------------------------------
+# EKS Add-on: AWS EBS CSI Driver
+# Installs the aws-ebs-csi-driver addon and binds it to the IRSA role
+# -------------------------------
+
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name = aws_eks_cluster.cluster.name
+  addon_name   = "aws-ebs-csi-driver"
+
+  # Use the IRSA role created above for the controller service account
+  service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
+
+  # Let AWS pick the latest compatible version unless specified
+  # addon_version = var.ebs_csi_addon_version
+
+  # Ensure the addon can reconcile any existing resources
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  tags = local.common_tags
+
+  depends_on = [
+    module.ebs_csi_driver_irsa,
+    aws_eks_cluster.cluster,
+    aws_eks_node_group.default
+  ]
+}
+
 # Create internal load balancer for private ingress
 # resource "kubernetes_service" "private_lb_placeholder" {
 #   metadata {
