@@ -43,7 +43,7 @@ global:
   
   # AWS-specific configuration
   cloud_storage_provider: "aws"
-  cloud_service_provider: "aws"
+  cloud_service_provider: "s3"
   sunbird_cloud_storage_provider: "aws"
   checkpoint_store_type: "s3"
   cloud_storage_region: "ap-south-1" # e.g., us-east-1
@@ -54,11 +54,11 @@ global:
   # public_subnet_ids: []  # If create_network: false
 
   # EKS configuration
-  eks_cluster_version: "1.28"
-  eks_node_instance_type: "t3.micro"
-  eks_node_disk_size_gb: 30
+  eks_cluster_version: "1.33"
+  eks_node_instance_type: "t3.medium"
+  eks_node_disk_size_gb: 70
   eks_node_count_min: 1
-  eks_node_count_max: 2
+  eks_node_count_max: 4
   
   # Database (optional - set create_database: false if using external DB)
   create_database: false
