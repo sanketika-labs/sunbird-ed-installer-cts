@@ -4,7 +4,7 @@ generate "backend" {
   contents = <<EOF
 terraform {
   backend "local" {
-    path = "${path_relative_to_include()}/terraform.tfstate"
+    path = "${get_parent_terragrunt_dir()}/.terraform/${path_relative_to_include()}/terraform.tfstate"
   }
 }
 EOF
