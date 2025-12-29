@@ -74,7 +74,7 @@ terragrunt run-all output
 
 ```bash
 # Navigate to your environment
-cd terraform/aws/your-environment
+cd opentofu/aws/your-environment
 
 # Source environment variables
 source tf.sh
@@ -100,12 +100,12 @@ source tf.sh
 
 ```bash
 # Update a specific module
-cd terraform/aws/your-environment/storage
+cd opentofu/aws/your-environment/storage
 source ../tf.sh
 terragrunt apply
 
 # Update all modules
-cd terraform/aws/your-environment
+cd opentofu/aws/your-environment
 source tf.sh
 terragrunt run-all apply
 ```
@@ -256,7 +256,7 @@ export TF_LOG_PROVIDER=DEBUG
 ### Fresh Installation
 
 ```bash
-cd terraform/aws/my-env
+cd opentofu/aws/my-env
 ./install.sh
 ```
 

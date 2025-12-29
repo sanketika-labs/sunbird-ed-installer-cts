@@ -151,7 +151,7 @@ tofu --version  # Should show 1.6.0 or higher
 Navigate to your environment directory and test:
 
 ```bash
-cd terraform/aws/your-environment
+cd opentofu/aws/your-environment
 source tf.sh
 
 # OpenTofu can read your existing Terraform state
@@ -214,7 +214,7 @@ terragrunt --version
 which tofu
 
 # Test initialization
-cd terraform/aws/template
+cd opentofu/aws/template
 source tf.sh
 terragrunt init
 

@@ -91,7 +91,7 @@ The installation creates the following AWS resources:
 After installing the required tools, verify your setup:
 
 ```bash
-cd terraform/aws
+cd opentofu/aws
 ./verify-opentofu-setup.sh
 ```
 
@@ -115,7 +115,7 @@ You can use the `AdministratorAccess` policy for initial setup, but it's recomme
 ### Step 1: Copy Template Directory
 
 ```bash
-cd terraform/aws
+cd opentofu/aws
 cp -r template my-environment
 cd my-environment
 ```

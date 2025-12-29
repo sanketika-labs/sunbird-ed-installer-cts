@@ -36,19 +36,19 @@ function create_tf_resources() {
 
 function certificate_keys() {
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out ../terraform/aws/$environment/certkey.pem
-    openssl rsa -in ../terraform/aws/$environment/certkey.pem -pubout -out ../terraform/aws/$environment/certpubkey.pem
+    openssl genrsa -out ../opentofu/aws/$environment/certkey.pem
+    openssl rsa -in ../opentofu/aws/$environment/certkey.pem -pubout -out ../opentofu/aws/$environment/certpubkey.pem
     
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../terraform/aws/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../terraform/aws/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../terraform/aws/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../terraform/aws/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/aws/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/aws/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
     
-    printf "\n" >> ../terraform/aws/$environment/global-values.yaml
-    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../terraform/aws/$environment/global-values.yaml
-    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../terraform/aws/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../terraform/aws/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../terraform/aws/$environment/global-values.yaml
+    printf "\n" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
 }
 
 function certificate_config() {
@@ -104,8 +104,8 @@ function install_component() {
         $ed_values_flag \
         -f "images.yaml" \
         -f "global-resources.yaml" \
-        -f "../terraform/aws/$environment/global-values.yaml" \
-        -f "../terraform/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/aws/$environment/global-values.yaml" \
+        -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {
@@ -179,7 +179,7 @@ function dns_mapping() {
 function generate_postman_env() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/aws/$environment 2>/dev/null || true
+        cd ../opentofu/aws/$environment 2>/dev/null || true
     fi
     
     domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
@@ -214,7 +214,7 @@ function restart_workloads_using_keys() {
 function run_post_install() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/aws/$environment 2>/dev/null || true
+        cd ../opentofu/aws/$environment 2>/dev/null || true
     fi
     
     check_pod_status
@@ -244,7 +244,7 @@ function post_install_nodebb_plugins() {
 function create_client_forms() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/aws/$environment 2>/dev/null || true
+        cd ../opentofu/aws/$environment 2>/dev/null || true
     fi
     
     cp -rf ../../../postman-collection/ED-${RELEASE} .
@@ -316,7 +316,7 @@ if [ $# -eq 0 ]; then
     create_tf_resources
     cd ../../../helmcharts
     install_helm_components
-    cd ../terraform/aws/$environment
+    cd ../opentofu/aws/$environment
     post_install_nodebb_plugins
     restart_workloads_using_keys
     certificate_config

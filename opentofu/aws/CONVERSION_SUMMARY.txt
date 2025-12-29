@@ -56,13 +56,13 @@ rm install-opentofu.sh
 
 STEP 2: Verify Installation
 ----------------------------
-cd terraform/aws
+cd opentofu/aws
 ./verify-opentofu-setup.sh
 
 STEP 3: Use Your Existing Infrastructure
 -----------------------------------------
 # Your existing Terraform state works immediately!
-cd terraform/aws/your-environment
+cd opentofu/aws/your-environment
 source tf.sh
 terragrunt init      # Terragrunt auto-detects OpenTofu
 terragrunt plan      # Should show no changes to existing resources
@@ -70,7 +70,7 @@ terragrunt apply     # Works exactly like before
 
 STEP 4: New Installation (if starting fresh)
 ---------------------------------------------
-cd terraform/aws
+cd opentofu/aws
 cp -r template my-environment
 cd my-environment
 # Edit global-values.yaml with your settings
@@ -191,10 +191,10 @@ GETTING HELP
 ================================================================================
 
 Documentation:
-  - Main README: terraform/aws/README.md
-  - Migration Guide: terraform/aws/OPENTOFU_MIGRATION.md
-  - Quick Reference: terraform/aws/QUICKREF.md
-  - Change Log: terraform/aws/CHANGES.md
+  - Main README: opentofu/aws/README.md
+  - Migration Guide: opentofu/aws/OPENTOFU_MIGRATION.md
+  - Quick Reference: opentofu/aws/QUICKREF.md
+  - Change Log: opentofu/aws/CHANGES.md
 
 Verification:
   - Run: ./verify-opentofu-setup.sh
