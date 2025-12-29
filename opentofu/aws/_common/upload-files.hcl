@@ -11,6 +11,7 @@ terraform {
 
 dependency "storage" {
   config_path = "../storage"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     storage_bucket_public  = "dummy-public-bucket"
     storage_bucket_private = "dummy-private-bucket"

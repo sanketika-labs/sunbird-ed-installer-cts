@@ -12,6 +12,7 @@ terraform {
 
 dependency "storage" {
   config_path = "../storage"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     storage_bucket_public  = "dummy-public"
     storage_bucket_private = "dummy-private"
@@ -22,6 +23,7 @@ dependency "storage" {
 
 dependency "iam" {
   config_path = "../iam"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     sunbird_sa_role_arn = "arn:aws:iam::123456789012:role/dummy-sunbird-sa"
     velero_sa_role_arn  = "arn:aws:iam::123456789012:role/dummy-velero-sa"
@@ -30,6 +32,7 @@ dependency "iam" {
 
 dependency "eks" {
   config_path = "../eks"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     cluster_name      = "dummy-cluster"
     oidc_provider     = "oidc.eks.us-east-1.amazonaws.com/id/DUMMY"
@@ -39,6 +42,7 @@ dependency "eks" {
 
 dependency "keys" {
   config_path = "../keys"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     random_string     = "dummy-random"
     encryption_string = "dummy-encryption"
