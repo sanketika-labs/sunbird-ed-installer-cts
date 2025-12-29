@@ -37,8 +37,8 @@ kong:
 
 global:
   building_block: "sb-cts" # Building block name
-  env: "dev" # Short environment name
-  environment: "dev" # Environment name (1-9 lowercase alphanumeric characters)
+  env: "staging" # Short environment name
+  environment: "staging" # Environment name (1-9 lowercase alphanumeric characters)
   release_version: "release-7.0.0"
   
   # AWS-specific configuration
