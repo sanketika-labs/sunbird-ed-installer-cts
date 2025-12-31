@@ -15,14 +15,11 @@ function create_tf_backend() {
 
 function backup_configs() {
     timestamp=$(date +%d%m%y_%H%M%S)
-    echo -e "\nBacking up existing config files if they exist..."
-
+    echo -e "\nBackup existing config files if they exist"
     mkdir -p ~/.kube
-    if [ -f ~/.kube/config ]; then
-        mv ~/.kube/config ~/.kube/config.$timestamp
-    fi
-
-    touch ~/.kube/config
+    mv ~/.kube/config ~/.kube/config.$timestamp || true
+    mkdir -p ~/.config/rclone
+    mv ~/.config/rclone/rclone.conf ~/.config/rclone/rclone.conf.$timestamp || true
     export KUBECONFIG=~/.kube/config
 }
 
@@ -35,9 +32,15 @@ function create_tf_resources() {
 }
 
 function certificate_keys() {
+    #  # If keys already present in global-values.yaml → skip writing
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/aws/$environment/global-values.yaml 2>/dev/null; then
+        echo "Certificate keys already present — skipping generation and write."
+        return
+    fi
+    # Generate private and public keys using openssl
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out ../opentofu/aws/$environment/certkey.pem
-    openssl rsa -in ../opentofu/aws/$environment/certkey.pem -pubout -out ../opentofu/aws/$environment/certpubkey.pem
+    openssl genrsa -out ../opentofu/aws/$environment/certkey.pem;
+    openssl rsa -in ../opentofu/aws/$environment/certkey.pem -pubout -out ../opentofu/aws/$environment/certpubkey.pem;
     
     CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
     CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
@@ -80,6 +83,7 @@ function install_component() {
     kubectl create namespace sunbird 2>/dev/null || true
     kubectl create namespace velero 2>/dev/null || true
     kubectl create namespace volume-autoscaler 2>/dev/null || true
+    kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -117,7 +121,7 @@ function install_helm_components() {
 
 function dns_mapping() {
     echo -e "\nConfiguring DNS..."
-    public_lb=$(kubectl get svc -n sunbird nginx-public-ingress-ingress-nginx-controller -ojsonpath='{.status.loadBalancer.ingress[0].hostname}')
+    public_lb=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].hostname}')
     domain=$(yq '.global.domain' global-values.yaml)
     
     echo "Public LoadBalancer: $public_lb"
@@ -183,6 +187,7 @@ function generate_postman_env() {
     fi
     
     domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
+    blob_store_path=$(kubectl get cm -n sunbird player-env -o jsonpath='{.data.sunbird_public_storage_account_name}' | sed 's|/$||')
     public_bucket=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_storage_resourceBundle_bucketname}')
     api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_portal_session_secret}')
@@ -199,10 +204,12 @@ function generate_postman_env() {
         -e "s|REPLACE_WITH_KEYCLOAK_ADMIN|${keycloak_admin}|g" \
         -e "s|REPLACE_WITH_KEYCLOAK_PASSWORD|${keycloak_password}|g" \
         -e "s|GENERATE_UUID|${generated_uuid}|g" \
+        -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
         -e "s|PUBLIC_CONTAINER_NAME|${public_bucket}|g" \
         "${temp_file}" >"env.json"
 
-    echo -e "✓ env.json file created in: terraform/aws/$environment"
+    echo -e "A env.json file is created in this directory: opentofu/aws/$environment"
+    echo "Import the env.json file into postman to invoke other APIs"
 }
 
 function restart_workloads_using_keys() {
@@ -257,12 +264,12 @@ function create_client_forms() {
 }
 
 function cleanworkspace() {
-    rm -f certkey.pem certpubkey.pem
-    sed -i '/CERTIFICATE_PRIVATE_KEY:/d' global-values.yaml
-    sed -i '/CERTIFICATE_PUBLIC_KEY:/d' global-values.yaml
-    sed -i '/CERTIFICATESIGN_PRIVATE_KEY:/d' global-values.yaml
-    sed -i '/CERTIFICATESIGN_PUBLIC_KEY:/d' global-values.yaml
-    echo "✓ Workspace cleaned"
+        rm certkey.pem certpubkey.pem
+        sed -i '/CERTIFICATE_PRIVATE_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATE_PUBLIC_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATESIGN_PRIVATE_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATESIGN_PUBLIC_KEY:/d' global-values.yaml
+        echo "cleanup completed"
 }
 
 function destroy_tf_resources() {
@@ -281,30 +288,28 @@ function invoke_functions() {
 function check_pod_status() {
     echo -e "\nRemove any orphaned pods if they exist."
     kubectl get pod -n sunbird --no-headers | grep -v Completed | grep -v Running | awk '{print $1}' | xargs -I {} kubectl delete -n sunbird pod {} || true
-    
     local timeout=$((SECONDS + 600))
     consecutive_runs=0
     echo "Ensure the pods are stable for 100 seconds"
     
     while [ $SECONDS -lt $timeout ]; do
-        crashing_pods=$(kubectl get pods -n sunbird --no-headers | grep -v -E 'Completed|Running' | wc -l)
-        
-        if [ "$crashing_pods" -eq 0 ]; then
-            consecutive_runs=$((consecutive_runs + 10))
-            echo "All pods stable. Countdown: $consecutive_runs/100"
-            if [ "$consecutive_runs" -ge 100 ]; then
-                echo "✓ All pods are running successfully"
-                return 0
-            fi
+        if ! kubectl get pods --no-headers -n sunbird | grep -v Running | grep -v Completed; then
+            echo "All pods are running successfully."
+            break
         else
-            consecutive_runs=0
-            echo "$crashing_pods crashing pods found. Countdown reset."
+            ((consecutive_runs++))
         fi
-        
+
+        if [ $consecutive_runs -ge 10 ]; then
+            echo "Timed out after 10 tries. Some pods are still not running successfully. Check the crashing pod logs and resolve the issues. Once pods are running successfully, re-reun this script as below:"
+            echo "./install.sh run_post_install"
+            exit
+        fi
+
+        echo "Number of crashing pods found. Countdown to 10"
         sleep 10
     done
-    
-    echo "✓ All pods are running successfully"
+    echo "All pods are running successfully."
 }
 
 RELEASE="release700"
