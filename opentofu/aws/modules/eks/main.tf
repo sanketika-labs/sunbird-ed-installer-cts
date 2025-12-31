@@ -81,7 +81,7 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
 
 resource "aws_eks_cluster" "cluster" {
   name     = local.cluster_name
-  version  = "1.33"
+  version  = "${var.cluster_version}"
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {

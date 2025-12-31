@@ -3,7 +3,11 @@ locals {
   environment         = local.global_vars.global.environment
   building_block      = local.global_vars.global.building_block
   aws_region          = local.global_vars.global.cloud_storage_region
-  eks_cluster_version = lookup(local.global_vars.global, "eks_cluster_version", "1.28")
+  eks_cluster_version = local.global_vars.global.eks_cluster_version
+  node_instance_type  = local.global_vars.global.eks_node_instance_type
+  node_disk_size_gb   = local.global_vars.global.eks_node_disk_size_gb
+  node_count_min      = local.global_vars.global.eks_node_count_min
+  node_count_max      = local.global_vars.global.eks_node_count_max
 }
 
 terraform {
@@ -25,8 +29,8 @@ inputs = {
   vpc_id                  = dependency.network.outputs.vpc_id
   public_subnet_ids       = dependency.network.outputs.public_subnet_ids
   cluster_version         = local.eks_cluster_version
-  node_instance_type      = lookup(local.global_vars.global, "eks_node_instance_type", "m5.2xlarge")
-  node_disk_size_gb       = lookup(local.global_vars.global, "eks_node_disk_size_gb", 100)
-  node_count_min          = lookup(local.global_vars.global, "eks_node_count_min", 3)
-  node_count_max          = lookup(local.global_vars.global, "eks_node_count_max", 10)
+  node_instance_type      = local.node_instance_type
+  node_disk_size_gb       = local.eks_node_disk_size_gb
+  node_count_min          = local.node_count_min
+  node_count_max          = local.node_count_max
 }
