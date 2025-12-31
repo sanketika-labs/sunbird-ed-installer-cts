@@ -30,7 +30,7 @@ inputs = {
   public_subnet_ids       = dependency.network.outputs.public_subnet_ids
   cluster_version         = local.eks_cluster_version
   node_instance_type      = local.node_instance_type
-  node_disk_size_gb       = local.eks_node_disk_size_gb
+  node_disk_size_gb       = local.node_disk_size_gb
   node_count_min          = local.node_count_min
   node_count_max          = local.node_count_max
 }
