@@ -45,6 +45,14 @@ dependency "keys" {
   }
 }
 
+dependency "storage_user" {
+  config_path = "../storage-user"
+  mock_outputs = {
+    storage_access_key_id     = "AKIAIOSFODNN7EXAMPLE"
+    storage_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+  }
+}
+
 inputs = {
   env                           = local.env
   environment                   = local.environment
@@ -62,5 +70,7 @@ inputs = {
   encryption_string             = dependency.keys.outputs.encryption_string
   random_string                 = dependency.keys.outputs.random_string
   cloud_storage_provider        = "aws"
+  cloud_storage_access_key      = dependency.storage_user.outputs.storage_access_key_id
+  cloud_storage_secret_key      = dependency.storage_user.outputs.storage_secret_access_key
   base_location                 = get_terragrunt_dir()
 }

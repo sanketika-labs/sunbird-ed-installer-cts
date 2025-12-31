@@ -85,3 +85,15 @@ variable "base_location" {
   description = "Base location for file paths"
   type        = string
 }
+
+variable "cloud_storage_access_key" {
+  description = "Storage user access key ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloud_storage_secret_key" {
+  description = "Storage user secret access key"
+  type        = string
+  sensitive   = true
+}
