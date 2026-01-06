@@ -1,0 +1,11 @@
+output "random_string" {
+  description = "Generated random string for JWT keys"
+  value       = random_password.generated_string.result
+  sensitive   = true
+}
+
+output "encryption_string" {
+  description = "Generated encryption string"
+  value       = random_password.encryption_string.result
+  sensitive   = true
+}
