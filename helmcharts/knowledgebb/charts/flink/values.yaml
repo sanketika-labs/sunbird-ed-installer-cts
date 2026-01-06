@@ -189,7 +189,7 @@ base_config: |
   }
   job {
     env = "{{ .Values.global.env }}"
-    enable.distributed.checkpointing = true
+    enable.distributed.checkpointing = false
 
     {{- if eq "oci" .Values.global.checkpoint_store_type }}
     statebackend {
@@ -524,7 +524,6 @@ flink_jobs:
 
       dialcode {
         linkable.primaryCategory = ["Course"]
-        storage.container = "{{ .Values.global.dial_state_container_public }}"
       }
 
       cloudstorage.metadata.replace_absolute_path=true

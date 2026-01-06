@@ -85,7 +85,7 @@ storageClass: ""
 
 ######################### Druid common variables ########################
 druid_directory: "/opt/druid"
-druid_extensions_loadList: '"postgresql-metadata-storage", "druid-kafka-indexing-service", "druid-azure-extensions", "druid-google-extensions"'
+druid_extensions_loadList: '"postgresql-metadata-storage", "druid-kafka-indexing-service", "druid-s3-extensions", "druid-azure-extensions", "druid-google-extensions"'
 
 # Logging
 # Log all runtime properties on startup. Disable to avoid logging properties on startup:
@@ -103,6 +103,14 @@ druid_postgresql_db: "druid_raw"
 azure_storage_account_name: ""
 azure_storage_account_key: ""
 azure_storage_container: ""
+
+# S3 Storage Details
+druid_storage_baseKey: "druid/segments"
+druid_s3_endpoint_url: ""
+druid_s3_endpoint_signingRegion: "us-east-1"
+druid_s3_protocol: "https"
+druid_s3_path_style_access: "false"
+s3_bucket: ""
 
 
 # Indexing service logs

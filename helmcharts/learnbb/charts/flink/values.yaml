@@ -376,7 +376,7 @@ base_config: |
     }
     job {
       env = "{{ .Values.global.env }}"
-      enable.distributed.checkpointing = true
+      enable.distributed.checkpointing = false
 
       {{- if eq "oci" .Values.global.checkpoint_store_type }}
       statebackend {
@@ -873,8 +873,8 @@ flink_jobs:
       sunbird_sso_realm = "sunbird"
       sunbird_sso_client_secret = "{{ .Values.sunbird_sso_client_id }}{{ .Values.global.random_string }}"
       sunbird_sso_client_id = "{{ .Values.sunbird_sso_client_id }}"
-      sunbird_sso_password = "{{.Values.global.keycloak.keycloak_password}}"
-      sunbird_sso_username = "{{.Values.global.keycloak.keycloak_user}}"
+      sunbird_sso_password = "{{.Values.keycloak_password}}"
+      sunbird_sso_username = "{{.Values.keycloak_user}}"
       sunbird_sso_url = "https://{{ .Values.global.domain }}/auth/"
   
       user {

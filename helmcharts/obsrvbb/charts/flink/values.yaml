@@ -305,7 +305,7 @@ base_config: |
       }
     job {
       env = "{{ .Values.global.env }}"
-      enable.distributed.checkpointing = true
+      enable.distributed.checkpointing = false
 
       {{- if eq "oci" .Values.global.checkpoint_store_type }}
       statebackend {
@@ -322,7 +322,9 @@ base_config: |
         base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
       }
       {{- else }}
-      # No valid checkpoint_store_type configured, skipping statebackend.
+      statebackend {
+        base.url = "file:///checkpoint"
+      }
       {{- end }}
     }
     

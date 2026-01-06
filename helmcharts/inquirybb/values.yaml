@@ -135,11 +135,11 @@ kafka: &kafka
 
 cloud_storage:
 play_http: &play_http
-  secret_key: "a-dummy-play-http-secret-key"
+  secret_key: "a-dummy-play-http-secret-key-32chars-minimum"
 schema: &schema
     base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
 graph_passport: &graph_passport
-  key_base: "a-dummy-graph_passport-secret-key"
+  key_base: "a-dummy-graph-passport-secret-key-32chars"
 installation: &installation
   id: ekstep
 

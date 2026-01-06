@@ -73,8 +73,10 @@ spec:
       druid.s3.secretKey = {{ .Values.global.cloud_storage_secret_key }}
       druid.storage.bucket= {{ .Values.global.private_container_name }}
       druid.storage.baseKey={{ .Values.druid_storage_baseKey }}
+      {{- if .Values.druid_s3_endpoint_url }}
       druid.s3.endpoint.url={{ .Values.druid_s3_endpoint_url }}
-      druid.s3.endpoint.signingRegion={{ .Values.druid_s3_endpoint_signingRegion }}
+      {{- end }}
+      druid.s3.endpoint.signingRegion={{ .Values.global.cloud_storage_region }}
       druid.s3.protocol={{ .Values.druid_s3_protocol }}
       druid.s3.enablePathStyleAccess={{ .Values.druid_s3_path_style_access }}
       {{- end }}
