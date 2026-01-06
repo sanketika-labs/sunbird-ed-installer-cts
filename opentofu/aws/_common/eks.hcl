@@ -16,6 +16,7 @@ terraform {
 
 dependency "network" {
   config_path = "../network"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     vpc_id              = "vpc-dummy"
     public_subnet_ids   = ["subnet-dummy-3", "subnet-dummy-4"]

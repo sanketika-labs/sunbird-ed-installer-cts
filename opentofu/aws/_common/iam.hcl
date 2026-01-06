@@ -11,6 +11,7 @@ terraform {
 
 dependency "eks" {
   config_path = "../eks"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E"
     oidc_provider     = "oidc.eks.us-east-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E"
@@ -19,6 +20,7 @@ dependency "eks" {
 
 dependency "storage" {
   config_path = "../storage"
+  mock_outputs_merge_strategy_with_state = "shallow"
   mock_outputs = {
     storage_bucket_public  = "dummy-public-bucket"
     storage_bucket_private = "dummy-private-bucket"
