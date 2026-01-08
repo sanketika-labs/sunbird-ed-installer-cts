@@ -321,7 +321,7 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  knowledge_mw:
+  knowledgemw:
     image: *knowledge_mw
     imagePullSecrets:
       - name: "registry-secret-name"
