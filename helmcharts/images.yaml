@@ -144,7 +144,7 @@ images:
 
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
-    tag: "release-8.1.0_rc2_144d90d_10"
+    tag: "release-8.1.0_rc3_35b8a2e_13"
 
   notification: &notification
     repository: "ghcr.io/sunbird-lern/notification-service"
