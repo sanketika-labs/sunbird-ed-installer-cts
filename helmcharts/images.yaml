@@ -281,7 +281,7 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  discussion_mw:
+  discussionmw:
     image: *discussion_mw
     imagePullSecrets:
       - name: "registry-secret-name"
