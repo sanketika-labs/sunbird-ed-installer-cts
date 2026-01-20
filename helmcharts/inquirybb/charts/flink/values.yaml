@@ -295,7 +295,7 @@ flink_jobs:
       }
       print_service.base_url = "{{ .Values.kp_print_service_base_url }}"
       #Cloud Storage Config
-      cloud_storage_type: "{{ .Values.global.checkpoint_store_type }}"
+      cloud_storage_type: "{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"  
       cloud_storage_secret: "{{ .Values.global.cloud_storage_secret_key }}" 
       cloud_storage_endpoint: ""
@@ -345,7 +345,7 @@ flink_jobs:
       }
       print_service.base_url = "{{ .Values.kp_print_service_base_url }}"
       #Cloud Storage Config
-      cloud_storage_type: "{{ .Values.global.checkpoint_store_type }}"
+      cloud_storage_type: "{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
       cloud_storage_secret: "{{ .Values.global.cloud_storage_secret_key }}"
       cloud_storage_endpoint: ""
