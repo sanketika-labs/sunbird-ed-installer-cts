@@ -66,3 +66,6 @@ nginx-public-ingress:
     reloader.stakater.com/auto: "true"
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
     service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+# Add below 2 annotations if the certificate is generated from aws acm.
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "<update-with-your-cert-arn>"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
