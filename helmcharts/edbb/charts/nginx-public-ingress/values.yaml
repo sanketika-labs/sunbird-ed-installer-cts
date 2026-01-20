@@ -24,13 +24,14 @@ securityContext: {}
 
 service:
   type: LoadBalancer
+  externalTrafficPolicy: Cluster
   ports:
     - name: http
       port: 80
       targetPort: 80
     - name: https
       port: 443
-      targetPort: 443
+      targetPort: 80
 
 serviceMetrics:
   type: ClusterIP
@@ -150,7 +151,6 @@ global:
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
-  service.beta.kubernetes.io/azure-load-balancer-external: "true" 
 
 merge_domain: "merge.example.com"
 merge_domain_status: true
