@@ -106,17 +106,10 @@ phases:
       
       # Phase 1: Independent modules (no dependencies)
       - echo "Phase 1: Deploying independent modules"
-      - |
-        set -e
-        for module in network storage keys random_passwords; do
-          echo "Deploying $module..."
-          cd $module
-          terragrunt init -upgrade
-          terragrunt plan -out=tfplan
-          terragrunt apply --terragrunt-non-interactive
-          cd ..
-          echo "✓ $module deployed successfully"
-        done
+      - cd network && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ network deployed successfully"
+      - cd storage && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ storage deployed successfully"
+      - cd keys && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ keys deployed successfully"
+      - cd random_passwords && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ random_passwords deployed successfully"
       
       # Phase 2: EKS (depends on network)
       - echo "Phase 2: Deploying EKS cluster"
