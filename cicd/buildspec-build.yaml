@@ -86,8 +86,8 @@ phases:
         fi
       
       # Initialize and apply Terragrunt infrastructure
-      - terragrunt run-all init --terragrunt-non-interactive
-      - terragrunt run-all plan --terragrunt-non-interactive
+      - terragrunt run-all init
+      - terragrunt run-all plan
       - terragrunt run-all apply --terragrunt-non-interactive
       
       # Build and push Docker image
