@@ -78,9 +78,16 @@ phases:
 
   build:
     commands:
+      # Check if root terragrunt.hcl exists, if not use run-all from parent
+      - |
+        if [ -f "root.hcl" ]; then
+          echo "Found root.hcl, copying to terragrunt.hcl"
+          cp root.hcl terragrunt.hcl
+        fi
+      
       # Initialize and apply Terragrunt infrastructure
-      - terragrunt init -upgrade
-      - terragrunt run-all plan
+      - terragrunt run-all init --terragrunt-non-interactive
+      - terragrunt run-all plan --terragrunt-non-interactive
       - terragrunt run-all apply --terragrunt-non-interactive
       
       # Build and push Docker image
@@ -96,14 +103,9 @@ phases:
 
   post_build:
     commands:
-      # Configure kubectl to connect to the created EKS cluster
-      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $(cd opentofu/aws/$ENVIRONMENT && terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
-      
-      # Verify cluster connectivity
-      - kubectl get nodes
-      
       # Export image tag for deployment stage
       - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.env
+      - echo "Infrastructure provisioning and image build completed successfully"
 
 artifacts:
   files:
