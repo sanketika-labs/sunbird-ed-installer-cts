@@ -1,0 +1,96 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      # Install AWS CLI
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - sudo ./aws/install
+      - aws --version
+
+      # Install OpenTofu
+      - curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+      - chmod +x install-opentofu.sh
+      - sudo ./install-opentofu.sh --install-method standalone
+      - rm install-opentofu.sh
+      - tofu --version
+
+      # Install Terragrunt
+      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.8/terragrunt_linux_amd64
+      - chmod +x terragrunt_linux_amd64
+      - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+      - terragrunt --version
+
+      # Install kubectl
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - sudo mv kubectl /usr/local/bin/
+      - kubectl version --client
+
+      # Install Helm
+      - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - helm version
+
+      # Install yq
+      - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      - sudo chmod +x /usr/bin/yq
+      - yq --version
+
+      # Install Newman
+      - sudo npm install -g newman
+      - newman --version
+
+  pre_build:
+    commands:
+      # Configure AWS credentials (assuming they are set as environment variables)
+      - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+      - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+      - aws configure set default.region $AWS_DEFAULT_REGION
+
+      # Navigate to opentofu directory
+      - cd opentofu/aws
+
+      # Copy template to environment (assuming env name is passed as env var)
+      - cp -r template $ENVIRONMENT
+      - cd $ENVIRONMENT
+
+      # Note: global-values.yaml should be provided or generated here
+      # For CI/CD, you might need to inject secrets and configs
+
+  build:
+    commands:
+      # Initialize Terragrunt
+      - terragrunt init -upgrade
+
+      # Plan the deployment
+      - terragrunt run-all plan -out=tfplan
+
+      # Apply the infrastructure (uncomment for actual deployment)
+      # - terragrunt run-all apply --terragrunt-non-interactive
+
+      # For CI/CD, you might want to apply only if approved or on certain branches
+
+  post_build:
+    commands:
+      # Configure kubectl for the cluster
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $(terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
+
+      # Verify cluster access
+      - kubectl get nodes
+
+      # Optional: Deploy Helm charts
+      # - cd ../../../helmcharts
+      # - helm dependency update
+      # - helm install sunbird . --values values.yaml
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
+
+cache:
+  paths:
+    - '/root/.cache/**/*'
