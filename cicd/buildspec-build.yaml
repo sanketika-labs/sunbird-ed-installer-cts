@@ -93,9 +93,6 @@ phases:
       # Copy template to environment using Target_Env variable
       - cp -r template $Target_Env
       - cd $Target_Env
-      
-      # Create terraform backend
-      - bash create_tf_backend.sh
 
       # Note: global-values.yaml should be provided or generated here
       # For CI/CD, you might need to inject secrets and configs
