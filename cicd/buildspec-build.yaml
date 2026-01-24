@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   variables:
-    ECR_REPOSITORY_URI: "061051225269.dkr.ecr.us-east-1.amazonaws.com" # URI of ECR repository
-    AWS_DEFAULT_REGION: "us-east-1" # Replace this with your AWS region
+    ECR_REPOSITORY_URI: "061051225269.dkr.ecr.us-east-1.amazonaws.com"
+    AWS_DEFAULT_REGION: "us-east-1"
   secrets-manager:
     APP_ID: "lms-scans-secrets:APP_ID"
     INSTALLATION_ID: "lms-scans-secrets:INSTALLATION_ID"
@@ -21,36 +21,36 @@ phases:
       - unzip awscliv2.zip
       - sudo ./aws/install --update
       - aws --version
-
+      
       # Install OpenTofu
       - curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
       - chmod +x install-opentofu.sh
       - sudo ./install-opentofu.sh --install-method standalone
       - rm install-opentofu.sh
       - tofu --version
-
+      
       # Install Terragrunt
       - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
       - chmod +x terragrunt_linux_amd64
       - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
       - terragrunt --version
-
+      
       # Install kubectl
       - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       - chmod +x kubectl
       - sudo mv kubectl /usr/local/bin/
       - kubectl version --client
-
+      
       # Install Helm
       - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       - helm version
-
+      
       # Install yq
       - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
       - sudo chmod +x /usr/bin/yq
       - yq --version
-
-      # Cloning 'lms-cicd-scripts' repo
+      
+      # Clone utility scripts repository
       - echo "Cloning centralized utility repo..."
       - git clone https://github.com/Cognizant-SPE/lms-cicd-scripts.git /tmp/lms-cicd-scripts
 
@@ -61,62 +61,56 @@ phases:
       - DATE_TAG=$(date +%y%m%d)
       - IMAGE_TAG="v1.0.$DATE_TAG-$CODEBUILD_BUILD_NUMBER"
       - ECR_REPOSITORY="$ECR_REPOSITORY_URI/$REPO_NAME"
-      - echo "Image tag: $IMAGE_TAG"
+      - echo "Image tag:$IMAGE_TAG"
       
-      # Login to ECR
+      # Login to Amazon ECR
       - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-
-      # Use Target_Env from pipeline configuration
+      
+      # Set environment and navigate to infrastructure directory
       - export ENVIRONMENT=${Target_Env:-demo}
-      - echo "Using environment: $ENVIRONMENT"
-
-      # Navigate to opentofu directory
+      - echo "Using environment:$ENVIRONMENT"
       - cd opentofu/aws
-
-      # Copy template to environment
+      
+      # Copy template to create environment-specific configuration
       - cp -r template $ENVIRONMENT
       - cd $ENVIRONMENT
 
   build:
     commands:
-      # Initialize Terragrunt
+      # Initialize and apply Terragrunt infrastructure
       - terragrunt init -upgrade
-
-      # Plan the deployment
       - terragrunt run-all plan
-
-      # Apply the infrastructure
       - terragrunt run-all apply --terragrunt-non-interactive
-
-      # Build Docker image
+      
+      # Build and push Docker image
       - cd ../../..
-      - echo "Building Docker image: $REPO_NAME:$IMAGE_TAG"
+      - echo "Building Docker image:$REPO_NAME:$IMAGE_TAG"
       - docker build -t $REPO_NAME:$IMAGE_TAG .
       - docker tag $REPO_NAME:$IMAGE_TAG $ECR_REPOSITORY:$IMAGE_TAG
-
-      # Push to ECR
+      
+      # Push image to ECR
       - echo "Pushing Docker image to ECR..."
       - docker push $ECR_REPOSITORY:$IMAGE_TAG
-      - echo "Docker image successfully pushed to ECR: $ECR_REPOSITORY:$IMAGE_TAG"
+      - echo "Docker image successfully pushed to ECR:$ECR_REPOSITORY:$IMAGE_TAG"
 
   post_build:
     commands:
-      # Configure kubectl for the cluster
+      # Configure kubectl to connect to the created EKS cluster
       - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $(cd opentofu/aws/$ENVIRONMENT && terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
-
-      # Verify cluster access
+      
+      # Verify cluster connectivity
       - kubectl get nodes
-
+      
       # Export image tag for deployment stage
       - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.env
 
 artifacts:
   files:
-    - '**/*'
-    - 'image_tag.env'
+    - "**/*"
+    - "image_tag.env"
   discard-paths: no
 
 cache:
   paths:
-    - '/root/.cache/**/*'
+    - "/root/.cache/**/*"
