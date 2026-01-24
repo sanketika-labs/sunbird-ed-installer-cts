@@ -8,7 +8,7 @@ phases:
       # Install AWS CLI
       - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       - unzip awscliv2.zip
-      - sudo ./aws/install --update flag
+      - sudo ./aws/install --update
       - aws --version
 
       # Install OpenTofu
@@ -19,7 +19,7 @@ phases:
       - tofu --version
 
       # Install Terragrunt
-      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.54.8/terragrunt_linux_amd64
+      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
       - chmod +x terragrunt_linux_amd64
       - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
       - terragrunt --version
