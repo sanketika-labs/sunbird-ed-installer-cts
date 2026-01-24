@@ -14,20 +14,20 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      # Install OpenTofu
-      - echo "Installing OpenTofu..."
-      - curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
-      - chmod +x install-opentofu.sh
-      - sudo ./install-opentofu.sh --install-method standalone
-      - rm install-opentofu.sh
-      - tofu --version
+      # Install kubectl
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - sudo mv kubectl /usr/local/bin/
+      - kubectl version --client
 
-      # Install Terragrunt
-      - echo "Installing Terragrunt..."
-      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
-      - chmod +x terragrunt_linux_amd64
-      - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
-      - terragrunt --version
+      # Install Helm
+      - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - helm version
+
+      # Install yq
+      - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      - sudo chmod +x /usr/bin/yq
+      - yq --version
 
       # Cloning 'lms-cicd-scrips' repo
       - echo "Cloning centralized utility repo..."
@@ -37,37 +37,28 @@ phases:
     commands:
       - |
         set -e
-        echo "Deploying using Terragrunt..."
+        echo "Deploying Helm charts..."
         
-        # Navigate to opentofu/aws directory
-        cd opentofu/aws
+        # Configure kubectl for the cluster
+        aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name sunbird-eks-cluster
         
-        # Use Target_Env from pipeline configuration
-        export ENVIRONMENT=${Target_Env:-demo}
-        echo "Using environment: $ENVIRONMENT"
+        # Navigate to helmcharts directory
+        cd helmcharts
         
-        # Copy template to environment if it doesn't exist
-        if [ ! -d "$ENVIRONMENT" ]; then
-          echo "Creating environment directory: $ENVIRONMENT"
-          cp -r template $ENVIRONMENT
-        fi
+        # Deploy Helm charts based on environment
+        echo "Deploying to environment: $Target_Env"
         
-        cd $ENVIRONMENT
-        echo "Running Terragrunt from $(pwd)..."
+        # Example helm deployments - adjust based on your requirements
+        helm dependency update
+        helm upgrade --install sunbird-edbb edbb/ --values edbb/values.yaml --namespace sunbird --create-namespace
+        helm upgrade --install sunbird-learnbb learnbb/ --values learnbb/values.yaml --namespace sunbird
+        helm upgrade --install sunbird-knowledgebb knowledgebb/ --values knowledgebb/values.yaml --namespace sunbird
         
-        # Initialize Terragrunt
-        terragrunt init -upgrade
-        
-        echo "Terragrunt plan..."
-        terragrunt run-all plan
-        
-        echo "Applying Terragrunt changes..."
-        terragrunt run-all apply --terragrunt-non-interactive
-        echo "Terragrunt Apply completed..."
+        echo "Helm deployment completed..."
   post_build:
     commands:
       - echo "Deployment completed successfully."
-      - cd ../../..
+      - cd ..
       - bash /tmp/lms-cicd-scripts/utility/script/deployment-metadata.sh
       - |
         if [ "$Target_Env" = "prod" ];then
