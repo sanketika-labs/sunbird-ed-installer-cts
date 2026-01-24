@@ -1,35 +1,3 @@
-# Sunbird-ED Infrastructure Build Pipeline
-# 
-# This buildspec deploys infrastructure modules in the following dependency order:
-# 
-# Phase 1 (Independent modules - no dependencies):
-#   1. network - Creates VPC, subnets, security groups
-#   2. storage - Creates S3 buckets for public/private storage
-#   3. keys - Generates encryption keys and random strings
-#   4. random_passwords - Generates random passwords for services
-# 
-# Phase 2 (Depends on network):
-#   5. eks - Creates EKS cluster using VPC from network module
-# 
-# Phase 3 (Depends on storage):
-#   6. storage-user - Creates IAM user with S3 bucket permissions
-# 
-# Phase 4 (Depends on eks and storage):
-#   7. iam - Creates service account roles for EKS workloads
-# 
-# Phase 5 (Depends on all previous modules):
-#   8. output-file - Generates global-cloud-values.yaml with all outputs
-# 
-# Phase 6 (Final step):
-#   9. upload-files - Uploads configuration files to S3
-# 
-# Environment Variables:
-#   - Target_Env: Target environment name (from pipeline)
-#   - TF_VAR_aws_account_id: AWS Account ID (from Parameter Store)
-#   - FullRepository_name: Full repository name (from pipeline)
-#   - DEPLOYED_BY: User who triggered the deployment (from pipeline)
-#   - TF_LOG: Terraform logging level
-
 version: 0.2
 
 env:
@@ -43,98 +11,100 @@ phases:
       python: 3.8
       nodejs: 18
     commands:
-      # Install AWS CLI
       - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
       - unzip awscliv2.zip
       - sudo ./aws/install --update
       - aws --version
-
-      # Install OpenTofu
       - curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
       - chmod +x install-opentofu.sh
       - sudo ./install-opentofu.sh --install-method standalone
       - rm install-opentofu.sh
       - tofu --version
-
-      # Install Terragrunt
       - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
       - chmod +x terragrunt_linux_amd64
       - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
       - terragrunt --version
-
-      # Install kubectl
       - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       - chmod +x kubectl
       - sudo mv kubectl /usr/local/bin/
       - kubectl version --client
-
-      # Install Helm
       - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       - helm version
-
-      # Install yq
       - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
       - sudo chmod +x /usr/bin/yq
       - yq --version
-
-      # Install Newman
       - sudo npm install -g newman
       - newman --version
 
   pre_build:
     commands:
-      # Configure AWS credentials (assuming they are set as environment variables)
-      #- aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-      #- aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-      #- aws configure set default.region $AWS_DEFAULT_REGION
-
-      # Navigate to opentofu directory
       - cd opentofu/aws
-
-      # Copy template to environment using Target_Env variable
       - cp -r template $Target_Env
       - cd $Target_Env
 
-      # Note: global-values.yaml should be provided or generated here
-      # For CI/CD, you might need to inject secrets and configs
-
   build:
     commands:
-      # Deploy infrastructure modules in dependency order
-      
-      # Phase 1: Independent modules (no dependencies)
-      - echo "Phase 1: Deploying independent modules"
-      - cd network && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "network deployed successfully"
-      - cd storage && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "storage deployed successfully"
-      - cd keys && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "keys deployed successfully"
-      - cd random_passwords && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "random_passwords deployed successfully"
-      
-      # Phase 2: EKS (depends on network)
-      - echo "Phase 2: Deploying EKS cluster"
-      - cd eks && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "Phase 1 - Deploying independent modules"
+      - cd network
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
+      - echo "network deployed successfully"
+      - cd storage
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
+      - echo "storage deployed successfully"
+      - cd keys
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
+      - echo "keys deployed successfully"
+      - cd random_passwords
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
+      - echo "random_passwords deployed successfully"
+      - echo "Phase 2 - Deploying EKS cluster"
+      - cd eks
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
       - echo "EKS cluster deployed successfully"
-      
-      # Phase 3: Storage User (depends on storage)
-      - echo "Phase 3: Deploying storage user"
-      - cd storage-user && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "Phase 3 - Deploying storage user"
+      - cd storage-user
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
       - echo "Storage user deployed successfully"
-      
-      # Phase 4: IAM (depends on eks and storage)
-      - echo "Phase 4: Deploying IAM roles"
-      - cd iam && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "Phase 4 - Deploying IAM roles"
+      - cd iam
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
       - echo "IAM roles deployed successfully"
-      
-      # Phase 5: Output files (depends on all previous modules)
-      - echo "Phase 5: Generating output files"
-      - cd output-file && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "Phase 5 - Generating output files"
+      - cd output-file
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
       - echo "Output files generated successfully"
-      
-      # Phase 6: Upload files (final step)
-      - echo "Phase 6: Uploading configuration files"
-      - cd upload-files && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "Phase 6 - Uploading configuration files"
+      - cd upload-files
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive
+      - cd ..
       - echo "Configuration files uploaded successfully"
-      
-      - echo "All infrastructure modules deployed successfully!"
+      - echo "All infrastructure modules deployed successfully"
 
   post_build:
     commands:
