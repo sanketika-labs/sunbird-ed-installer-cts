@@ -1,14 +1,40 @@
+# Sunbird-ED Infrastructure Build Pipeline
+# 
+# This buildspec deploys infrastructure modules in the following dependency order:
+# 
+# Phase 1 (Independent modules - no dependencies):
+#   1. network - Creates VPC, subnets, security groups
+#   2. storage - Creates S3 buckets for public/private storage
+#   3. keys - Generates encryption keys and random strings
+#   4. random_passwords - Generates random passwords for services
+# 
+# Phase 2 (Depends on network):
+#   5. eks - Creates EKS cluster using VPC from network module
+# 
+# Phase 3 (Depends on storage):
+#   6. storage-user - Creates IAM user with S3 bucket permissions
+# 
+# Phase 4 (Depends on eks and storage):
+#   7. iam - Creates service account roles for EKS workloads
+# 
+# Phase 5 (Depends on all previous modules):
+#   8. output-file - Generates global-cloud-values.yaml with all outputs
+# 
+# Phase 6 (Final step):
+#   9. upload-files - Uploads configuration files to S3
+# 
+# Environment Variables:
+#   - Target_Env: Target environment name (from pipeline)
+#   - TF_VAR_aws_account_id: AWS Account ID (from Parameter Store)
+#   - FullRepository_name: Full repository name (from pipeline)
+#   - DEPLOYED_BY: User who triggered the deployment (from pipeline)
+#   - TF_LOG: Terraform logging level
+
 version: 0.2
 
 env:
   variables:
-    ECR_REPOSITORY_URI: "061051225269.dkr.ecr.us-east-1.amazonaws.com"
-    AWS_DEFAULT_REGION: "us-east-1"
-  secrets-manager:
-    APP_ID: "lms-scans-secrets:APP_ID"
-    INSTALLATION_ID: "lms-scans-secrets:INSTALLATION_ID"
-    PRIVATE_KEY_BASE64: "lms-scans-secrets:PRIVATE_KEY_BASE64"
-  git-credential-helper: yes
+    TF_LOG: "INFO"
 
 phases:
   install:
@@ -21,98 +47,142 @@ phases:
       - unzip awscliv2.zip
       - sudo ./aws/install --update
       - aws --version
-      
+
       # Install OpenTofu
       - curl -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
       - chmod +x install-opentofu.sh
       - sudo ./install-opentofu.sh --install-method standalone
       - rm install-opentofu.sh
       - tofu --version
-      
+
       # Install Terragrunt
       - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
       - chmod +x terragrunt_linux_amd64
       - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
       - terragrunt --version
-      
+
       # Install kubectl
       - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       - chmod +x kubectl
       - sudo mv kubectl /usr/local/bin/
       - kubectl version --client
-      
+
       # Install Helm
       - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       - helm version
-      
+
       # Install yq
       - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
       - sudo chmod +x /usr/bin/yq
       - yq --version
-      
-      # Clone utility scripts repository
-      - echo "Cloning centralized utility repo..."
-      - git clone https://github.com/Cognizant-SPE/lms-cicd-scripts.git /tmp/lms-cicd-scripts
+
+      # Install Newman
+      - sudo npm install -g newman
+      - newman --version
 
   pre_build:
     commands:
-      # Generate image tag with date pattern
-      - REPO_NAME="sunbird-ed-installer"
-      - DATE_TAG=$(date +%y%m%d)
-      - IMAGE_TAG="v1.0.$DATE_TAG-$CODEBUILD_BUILD_NUMBER"
-      - ECR_REPOSITORY="$ECR_REPOSITORY_URI/$REPO_NAME"
-      - echo "Image tag:$IMAGE_TAG"
-      
-      # Login to Amazon ECR
-      - echo "Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-      
-      # Set environment and navigate to infrastructure directory
-      - export ENVIRONMENT=${Target_Env:-demo}
-      - echo "Using environment:$ENVIRONMENT"
+      # Configure AWS credentials (assuming they are set as environment variables)
+      #- aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+      #- aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+      #- aws configure set default.region $AWS_DEFAULT_REGION
+
+      # Navigate to opentofu directory
       - cd opentofu/aws
+
+      # Copy template to environment using Target_Env variable
+      - cp -r template $Target_Env
+      - cd $Target_Env
       
-      # Copy template to create environment-specific configuration
-      - cp -r template $ENVIRONMENT
-      - cd $ENVIRONMENT
+      # Create terraform backend
+      - bash create_tf_backend.sh
+
+      # Note: global-values.yaml should be provided or generated here
+      # For CI/CD, you might need to inject secrets and configs
 
   build:
     commands:
-      # Check if root terragrunt.hcl exists, if not use run-all from parent
+      # Deploy infrastructure modules in dependency order
+      
+      # Phase 1: Independent modules (no dependencies)
+      - echo "Phase 1: Deploying independent modules"
       - |
-        if [ -f "root.hcl" ]; then
-          echo "Found root.hcl, copying to terragrunt.hcl"
-          cp root.hcl terragrunt.hcl
-        fi
+        set -e
+        for module in network storage keys random_passwords; do
+          echo "Deploying $module..."
+          cd $module
+          terragrunt init -upgrade
+          terragrunt plan -out=tfplan
+          terragrunt apply --terragrunt-non-interactive
+          cd ..
+          echo "✓ $module deployed successfully"
+        done
       
-      # Initialize and apply Terragrunt infrastructure
-      - terragrunt run-all init
-      - terragrunt run-all plan
-      - terragrunt run-all apply --terragrunt-non-interactive
+      # Phase 2: EKS (depends on network)
+      - echo "Phase 2: Deploying EKS cluster"
+      - cd eks && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "✓ EKS cluster deployed successfully"
       
-      # Build and push Docker image
-      - cd ../../..
-      - echo "Building Docker image:$REPO_NAME:$IMAGE_TAG"
-      - docker build -t $REPO_NAME:$IMAGE_TAG .
-      - docker tag $REPO_NAME:$IMAGE_TAG $ECR_REPOSITORY:$IMAGE_TAG
+      # Phase 3: Storage User (depends on storage)
+      - echo "Phase 3: Deploying storage user"
+      - cd storage-user && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "✓ Storage user deployed successfully"
       
-      # Push image to ECR
-      - echo "Pushing Docker image to ECR..."
-      - docker push $ECR_REPOSITORY:$IMAGE_TAG
-      - echo "Docker image successfully pushed to ECR:$ECR_REPOSITORY:$IMAGE_TAG"
+      # Phase 4: IAM (depends on eks and storage)
+      - echo "Phase 4: Deploying IAM roles"
+      - cd iam && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "✓ IAM roles deployed successfully"
+      
+      # Phase 5: Output files (depends on all previous modules)
+      - echo "Phase 5: Generating output files"
+      - cd output-file && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "✓ Output files generated successfully"
+      
+      # Phase 6: Upload files (final step)
+      - echo "Phase 6: Uploading configuration files"
+      - cd upload-files && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
+      - echo "✓ Configuration files uploaded successfully"
+      
+      - echo "🎉 All infrastructure modules deployed successfully!"
 
   post_build:
     commands:
-      # Export image tag for deployment stage
-      - echo "export IMAGE_TAG=$IMAGE_TAG" > image_tag.env
-      - echo "Infrastructure provisioning and image build completed successfully"
+      # Configure kubectl for the cluster
+      - cd eks
+      - CLUSTER_NAME=$(terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
+      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME
+      - cd ..
+
+      # Verify cluster access
+      - kubectl get nodes
+      
+      # Verify all modules deployed successfully
+      - echo "Verifying infrastructure deployment"
+      - cd network && terragrunt output && cd ..
+      - cd storage && terragrunt output && cd ..
+      - cd eks && terragrunt output && cd ..
+      - cd iam && terragrunt output && cd ..
+      
+      # Generate global cloud values file
+      - cd output-file && terragrunt output && cd ..
+      
+      # Optional: Deploy Helm charts
+      # - cd ../../../helmcharts
+      # - helm dependency update
+      # - helm install sunbird . --values values.yaml
 
 artifacts:
   files:
-    - "**/*"
-    - "image_tag.env"
+    - 'opentofu/aws/$Target_Env/global-cloud-values.yaml'
+    - 'opentofu/aws/$Target_Env/env.json'
+    - 'opentofu/aws/$Target_Env/*.tfplan'
+    - 'opentofu/aws/$Target_Env/**/*.tfstate'
+    - '**/*.log'
+  name: sunbird-infrastructure-artifacts
   discard-paths: no
 
 cache:
   paths:
-    - "/root/.cache/**/*"
+    - '/root/.cache/**/*'
+    - '/root/.terraform.d/**/*'
+    - 'opentofu/aws/$Target_Env/**/.terraform/**/*'
