@@ -106,37 +106,37 @@ phases:
       
       # Phase 1: Independent modules (no dependencies)
       - echo "Phase 1: Deploying independent modules"
-      - cd network && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ network deployed successfully"
-      - cd storage && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ storage deployed successfully"
-      - cd keys && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ keys deployed successfully"
-      - cd random_passwords && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "✓ random_passwords deployed successfully"
+      - cd network && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "network deployed successfully"
+      - cd storage && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "storage deployed successfully"
+      - cd keys && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "keys deployed successfully"
+      - cd random_passwords && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd .. && echo "random_passwords deployed successfully"
       
       # Phase 2: EKS (depends on network)
       - echo "Phase 2: Deploying EKS cluster"
       - cd eks && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
-      - echo "✓ EKS cluster deployed successfully"
+      - echo "EKS cluster deployed successfully"
       
       # Phase 3: Storage User (depends on storage)
       - echo "Phase 3: Deploying storage user"
       - cd storage-user && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
-      - echo "✓ Storage user deployed successfully"
+      - echo "Storage user deployed successfully"
       
       # Phase 4: IAM (depends on eks and storage)
       - echo "Phase 4: Deploying IAM roles"
       - cd iam && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
-      - echo "✓ IAM roles deployed successfully"
+      - echo "IAM roles deployed successfully"
       
       # Phase 5: Output files (depends on all previous modules)
       - echo "Phase 5: Generating output files"
       - cd output-file && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
-      - echo "✓ Output files generated successfully"
+      - echo "Output files generated successfully"
       
       # Phase 6: Upload files (final step)
       - echo "Phase 6: Uploading configuration files"
       - cd upload-files && terragrunt init -upgrade && terragrunt plan -out=tfplan && terragrunt apply --terragrunt-non-interactive && cd ..
-      - echo "✓ Configuration files uploaded successfully"
+      - echo "Configuration files uploaded successfully"
       
-      - echo "🎉 All infrastructure modules deployed successfully!"
+      - echo "All infrastructure modules deployed successfully!"
 
   post_build:
     commands:
