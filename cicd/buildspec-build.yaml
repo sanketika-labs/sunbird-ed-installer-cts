@@ -48,7 +48,7 @@ phases:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
       - ./tg init 
-      - ./tg plan
+      #- ./tg plan
       #  - tg apply
       - echo "network deployed successfully"
       # - cd storage
