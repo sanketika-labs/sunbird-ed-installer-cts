@@ -17,7 +17,7 @@ phases:
       - sudo ./aws/install --update
       - aws --version
       - wget https://github.com/opentofu/opentofu/releases/download/v1.6.0/tofu_1.6.0_linux_amd64.zip
-      - unzip -o tofu_1.11.1_linux_amd64.zip
+      - unzip -o tofu_1.6.0_linux_amd64.zip
       - sudo mv tofu /usr/local/bin/
       - sudo chmod +x /usr/local/bin/tofu
       - tofu --version
