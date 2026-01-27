@@ -1,5 +1,3 @@
-iam_role = "arn:aws:iam::${get_env("TF_VAR_aws_account_id")}:role/lms-cross-account-codebuild-role"
-
 generate "backend" {
   path      = "backend.tf"
   if_exists = "overwrite_terragrunt"

@@ -1,6 +1,11 @@
 # Base orchestration configuration
 # This file prevents individual module execution and enforces run-all usage
 
+include "provider" {
+  path   = "${get_terragrunt_dir()}/../_provider.hcl"
+  expose = true
+}
+
 locals {
   # Check if running via orchestrated mode (run-all)
   # Set TERRAGRUNT_ORCHESTRATED=true when using run-all commands
