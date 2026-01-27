@@ -45,9 +45,9 @@ phases:
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
-      - echo $pwd
+      - pwd
       - cd network
-      - echo $pwd
+      - pwd
       # - terragrunt init -upgrade
       # - terragrunt plan -out=tfplan
       # - terragrunt apply
