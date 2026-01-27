@@ -42,17 +42,18 @@ phases:
       - cd opentofu/aws
       - cp -r template $Target_Env
       - cd $Target_Env
+      - chmod +x ./tg
 
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
-      - chmod +x ./tg
-      - ./tg init --terragrunt-working-dir ./network
-      - ./tg plan --terragrunt-working-dir ./network
-      - ./tg apply --terragrunt-working-dir ./network
-      # - cd ..
-      # - echo "network deployed successfully"
+      - cd network
+      - ./tg init
+      - ./tg plan
+      - ./tg apply
+      - cd ..
+      - echo "network deployed successfully"
       # - cd storage
       # - terragrunt init -upgrade
       # - terragrunt plan -out=tfplan
@@ -121,13 +122,13 @@ phases:
       
       # Verify all modules deployed successfully
       # - echo "Verifying infrastructure deployment"
-      - cd network && terragrunt output && cd ..
+      #- cd network && terragrunt output && cd ..
       # - cd storage && terragrunt output && cd ..
       # - cd eks && terragrunt output && cd ..
       # - cd iam && terragrunt output && cd ..
       
       # Generate global cloud values file
-      - cd output-file && terragrunt output && cd ..
+      #- cd output-file && terragrunt output && cd ..
       
       # Optional: Deploy Helm charts
       # - cd ../../../helmcharts
