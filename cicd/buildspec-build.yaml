@@ -51,7 +51,7 @@ phases:
       - cd network
       - terragrunt init 
       - terragrunt plan
-      - terragrunt apply --terragrunt-non-interactive -auto-approve
+      - terragrunt apply -auto-approve
       - echo "network deployed successfully"
       # - cd storage
       # - terragrunt init -upgrade
