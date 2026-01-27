@@ -51,7 +51,7 @@ phases:
       - cd network
       - terragrunt init 
       - terragrunt plan
-      #  - tg apply
+      - terragrunt apply
       - echo "network deployed successfully"
       # - cd storage
       # - terragrunt init -upgrade
