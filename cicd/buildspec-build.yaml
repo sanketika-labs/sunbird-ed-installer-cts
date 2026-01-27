@@ -109,16 +109,16 @@ phases:
   post_build:
     commands:
       # Configure kubectl for the cluster
-      - cd eks
-      - CLUSTER_NAME=$(terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
-      - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME
-      - cd ..
+      # - cd eks
+      # - CLUSTER_NAME=$(terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
+      # - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME
+      # - cd ..
 
       # Verify cluster access
-      - kubectl get nodes
+      # - kubectl get nodes
       
       # Verify all modules deployed successfully
-      - echo "Verifying infrastructure deployment"
+      # - echo "Verifying infrastructure deployment"
       - cd network && terragrunt output && cd ..
       # - cd storage && terragrunt output && cd ..
       # - cd eks && terragrunt output && cd ..
