@@ -21,7 +21,7 @@ phases:
       - sudo mv tofu /usr/local/bin/
       - sudo chmod +x /usr/local/bin/tofu
       - tofu --version
-      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.96.0/terragrunt_linux_amd64
+      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.70.12/terragrunt_linux_amd64
       - chmod +x terragrunt_linux_amd64
       - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
       - terragrunt --version
