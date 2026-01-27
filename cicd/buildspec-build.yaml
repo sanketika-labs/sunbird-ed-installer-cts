@@ -50,7 +50,7 @@ phases:
       - pwd
       - cd network
       - terragrunt init 
-      #- ./tg plan
+      - terrarunt plan
       #  - tg apply
       - echo "network deployed successfully"
       # - cd storage
