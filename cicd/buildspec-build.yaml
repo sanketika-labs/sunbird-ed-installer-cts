@@ -47,8 +47,6 @@ phases:
     commands:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
-      - cd network
-      - pwd
       - terragrunt init -upgrade
       - ./tg plan --terragrunt-working-dir ./network
       - ./tg apply --terragrunt-working-dir ./network
