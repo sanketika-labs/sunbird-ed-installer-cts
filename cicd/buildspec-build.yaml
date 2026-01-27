@@ -43,15 +43,15 @@ phases:
       - cp -r template $Target_Env
       - cd $Target_Env
       - chmod +x ./tg
-
+      - sudo cp ./tg /usr/local/bin/tg
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
       - cd network
-      - ./tg init
-      - ./tg plan
-      - ./tg apply
+      - tg init 
+      - tg plan
+      - tg apply
       - cd ..
       - echo "network deployed successfully"
       # - cd storage
