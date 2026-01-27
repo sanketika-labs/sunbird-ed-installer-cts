@@ -36,7 +36,7 @@ kong:
   kong_pg_password: *postgresql-password
 
 global:
-  building_block: "sb-dev" # Building block name
+  building_block: "sb" # Building block name
   env: "dev" # Short environment name
   environment: "dev" # Environment name (1-9 lowercase alphanumeric characters)
   release_version: "release-7.0.0"
