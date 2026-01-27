@@ -3,7 +3,8 @@ version: 0.2
 env:
   variables:
     TF_LOG: "INFO"
-    TERRAGRUNT_ALLOW_INDIVIDUAL: "false"
+    TERRAGRUNT_TFPATH=tofu
+    TERRAGRUNT_ALLOW_INDIVIDUAL: "true"
     Target_Env: "dev"
 
 phases:
@@ -42,12 +43,12 @@ phases:
       - cd opentofu/aws
       - cp -r template $Target_Env
       - cd $Target_Env
-      - chmod +x ./tg
+      # - chmod +x ./tg
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
-      - ./tg init 
+      - terragrunt init 
       #- ./tg plan
       #  - tg apply
       - echo "network deployed successfully"
