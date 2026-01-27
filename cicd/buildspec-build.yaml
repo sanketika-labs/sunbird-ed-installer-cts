@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    TF_LOG: "INFO"
+    # TF_LOG: "INFO"
     TERRAGRUNT_TFPATH: "tofu"
     TERRAGRUNT_ALLOW_INDIVIDUAL: "true"
     Target_Env: "dev"
