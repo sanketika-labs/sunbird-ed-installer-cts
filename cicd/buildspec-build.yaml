@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     TF_LOG: "INFO"
-    TERRAGRUNT_ALLOW_INDIVIDUAL: "true"
+    TERRAGRUNT_ALLOW_INDIVIDUAL: "false"
     Target_Env: "dev"
 
 phases:
@@ -47,7 +47,6 @@ phases:
     commands:
       - echo "Phase 1 - Deploying independent modules"
       - pwd
-      - cd network
       - tg init 
       - tg plan
       - tg apply
