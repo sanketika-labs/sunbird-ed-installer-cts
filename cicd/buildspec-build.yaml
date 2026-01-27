@@ -4,6 +4,7 @@ env:
   variables:
     TF_LOG: "INFO"
     TERRAGRUNT_ALLOW_INDIVIDUAL: "true"
+    Target_Env: "dev"
 
 phases:
   install:
@@ -48,9 +49,9 @@ phases:
       - pwd
       - cd network
       - pwd
-      # - terragrunt init -upgrade
-      # - terragrunt plan -out=tfplan
-      # - terragrunt apply
+      - terragrunt init -upgrade
+      - terragrunt plan -out=tfplan
+      - terragrunt apply --terragrunt-non-interactive -auto-approve
       # - cd ..
       # - echo "network deployed successfully"
       # - cd storage
