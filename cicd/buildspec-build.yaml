@@ -43,7 +43,6 @@ phases:
       - cp -r template $Target_Env
       - cd $Target_Env
       - chmod +x ./tg
-      - sudo cp ./tg /usr/local/bin/tg
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
