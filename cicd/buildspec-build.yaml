@@ -50,8 +50,8 @@ phases:
       - cd network
       - pwd
       - terragrunt init -upgrade
-      - terragrunt plan -out=tfplan
-      - terragrunt apply --terragrunt-non-interactive -auto-approve
+      - terragrunt plan -out=tfplan --auto-approve
+      - terragrunt apply --auto-approve
       # - cd ..
       # - echo "network deployed successfully"
       # - cd storage
