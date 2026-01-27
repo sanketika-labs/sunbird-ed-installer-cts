@@ -45,10 +45,12 @@ phases:
   build:
     commands:
       - echo "Phase 1 - Deploying independent modules"
-      - cd $Target_Env/network
-      - terragrunt init -upgrade
-      - terragrunt plan -out=tfplan
-      - terragrunt apply
+      - echo "$pwd"
+      - cd network
+      - echo "$pwd"
+      # - terragrunt init -upgrade
+      # - terragrunt plan -out=tfplan
+      # - terragrunt apply
       # - cd ..
       # - echo "network deployed successfully"
       # - cd storage
