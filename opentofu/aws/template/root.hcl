@@ -10,7 +10,7 @@ generate "backend" {
 terraform {
   backend "s3" {
     bucket = "lms-sunbird-terraform-states-s3"
-    key    = "terraform-states/lms-platform/dev/lms_sb_ed_installer.tfstate"
+    key    = "terraform-states/lms-platform/dev/lms_sunbird_ed_installer.tfstate"
     region = "${local.aws_region}"
     encrypt = true
   }
