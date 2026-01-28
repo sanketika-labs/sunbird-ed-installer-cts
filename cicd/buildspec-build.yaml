@@ -72,20 +72,13 @@ phases:
       # - terragrunt apply --terragrunt-non-interactive
       # - cd ..
       # - echo "random_passwords deployed successfully"
-      # - echo "Phase 2 - Deploying EKS cluster"
-      # - cd eks
-      # - terragrunt init 
-      # - terragrunt plan
-      # - terragrunt apply -auto-approve
-      # - cd ..
-      # - echo "EKS cluster deployed successfully"
-      # - echo "Phase 3 - Deploying storage user"
-      # - cd storage-user
-      # - terragrunt init -upgrade
-      # - terragrunt plan -out=tfplan
-      # - terragrunt apply --terragrunt-non-interactive
-      # - cd ..
-      # - echo "Storage user deployed successfully"
+      - echo "Phase 2 - Deploying EKS cluster"
+      - cd eks
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "EKS cluster deployed successfully"
       # - echo "Phase 4 - Deploying IAM roles"
       # - cd iam
       # - terragrunt init -upgrade
