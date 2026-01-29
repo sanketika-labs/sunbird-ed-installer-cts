@@ -313,7 +313,7 @@ function check_pod_status() {
 }
 
 RELEASE="release700"
-POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/${POSTMAN_COLLECTION_ID}"
+POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/234567-7899876-5f997"
 
 if [ $# -eq 0 ]; then
     create_tf_backend
