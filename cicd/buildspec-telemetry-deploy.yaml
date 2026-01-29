@@ -1,0 +1,25 @@
+version: 0.2
+
+env:
+  variables:
+
+phases:
+  install:
+    runtime-versions:
+     
+    commands:
+      
+  pre_build:
+    commands:
+      
+  build:
+    commands:
+      
+
+  post_build:
+    commands:
+    
+
+artifacts:
+  files:
+    
