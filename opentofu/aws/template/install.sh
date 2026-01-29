@@ -108,8 +108,9 @@ function install_component() {
         $ed_values_flag \
         -f "images.yaml" \
         -f "global-resources.yaml" \
-        -f "../opentofu/aws/$environment/global-values.yaml" \
-        -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/aws/$environment/global-values.yaml" --timeout 30m --debug
+
+        # -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {
