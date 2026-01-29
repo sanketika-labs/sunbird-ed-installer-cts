@@ -4,7 +4,7 @@ set -euo pipefail
 echo -e "\nPlease ensure you have updated all the mandatory variables as mentioned in the documentation."
 echo "The installation will fail if any of the mandatory variables are missing."
 echo "Press Enter to continue..."
-read -r
+# read -r
 
 environment=$(basename "$(pwd)")
 
@@ -81,9 +81,9 @@ function install_component() {
     
     local component="$1"
     kubectl create namespace sunbird 2>/dev/null || true
-    kubectl create namespace velero 2>/dev/null || true
+    # kubectl create namespace velero 2>/dev/null || true
     kubectl create namespace volume-autoscaler 2>/dev/null || true
-    kubectl create namespace nlweb 2>/dev/null || true
+    # kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
