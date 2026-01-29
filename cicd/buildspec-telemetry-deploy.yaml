@@ -2,19 +2,68 @@ version: 0.2
 
 env:
   variables:
-
+    CLUSTER_NAME: "sb-dev-cluster"
+    AWS_DEFAULT_REGION: "us-east-1"
+    
 phases:
   install:
     runtime-versions:
-     
     commands:
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - sudo ./aws/install --update
+      - aws --version
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - sudo mv kubectl /usr/local/bin/
+      - kubectl version --client
+      - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - helm version
+      - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      - sudo chmod +x /usr/bin/yq
+      - yq --version
       
   pre_build:
     commands:
-      
+      - cd opentofu/aws/template
+      - chmod +x install.sh
+
+      - echo "Checking AWS identity before assume-role (pipeline account)..."
+      - aws sts get-caller-identity
+
+      - echo "Using target account from pipeline parameter"
+      - export TARGET_ACCOUNT_ID="$TF_VAR_aws_account_id"
+
+
+      # Build role ARN from account id if not provided via env
+      - |
+        if [ -z "${ASSUME_ROLE_ARN:-}" ]; then
+          TARGET_ROLE_NAME="${TARGET_ROLE_NAME:-lms-cross-account-codebuild-role}"
+          export ASSUME_ROLE_ARN="arn:aws:iam::${TARGET_ACCOUNT_ID}:role/${TARGET_ROLE_NAME}"
+        fi
+      - echo "Assuming into target role $ASSUME_ROLE_ARN"
+
+      # If your org requires ExternalId, add: --external-id "$ASSUME_ROLE_EXTERNAL_ID"
+      - CREDS_JSON=$(aws sts assume-role --role-arn "$ASSUME_ROLE_ARN" --role-session-name codebuild-cross-account --duration-seconds 3600)
+      - export AWS_ACCESS_KEY_ID=$(echo "$CREDS_JSON" | jq -r .Credentials.AccessKeyId)
+      - export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS_JSON" | jq -r .Credentials.SecretAccessKey)
+      - export AWS_SESSION_TOKEN=$(echo "$CREDS_JSON" | jq -r .Credentials.SessionToken)
+
+      - echo "Caller (target account) after assume-role:"
+      - aws sts get-caller-identity
+
+      - echo "Listing EKS clusters in target account/region..."
+      - aws eks list-clusters --region "$AWS_DEFAULT_REGION"
+
+      - echo "Describing target cluster..."
+      - aws eks describe-cluster --region "$AWS_DEFAULT_REGION" --name "$CLUSTER_NAME"
+
+      - echo "Updating kubeconfig for kubectl/helm..."
+      - aws eks update-kubeconfig --region "$AWS_DEFAULT_REGION" --name "$CLUSTER_NAME"
+
   build:
     commands:
-      
+      - time ./install.sh install_component obsrvbb
 
   post_build:
     commands:
