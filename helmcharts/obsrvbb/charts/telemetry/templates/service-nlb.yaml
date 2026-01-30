@@ -14,10 +14,10 @@ spec:
   type: {{ .Values.loadBalancerService.type }}
   externalTrafficPolicy: {{ .Values.loadBalancerService.externalTrafficPolicy }}
   allocateLoadBalancerNodePorts: true
+  protocol: {{ .Values.loadBalancerService.protocol }}
   ports:
   {{- range .Values.loadBalancerService.ports }}
     - name: {{ .name }}
-      protocol: {{ .Values.loadBalancerService.protocol }}
       port: {{ .port }}
       targetPort: {{ .targetPort }}
   {{- end }}
