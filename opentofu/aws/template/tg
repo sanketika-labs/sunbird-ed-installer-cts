@@ -121,7 +121,7 @@ run_terragrunt() {
     print_header "Running: terragrunt run-all $command"
     echo ""
 
-    terragrunt run-all "$command" "$@"
+    terragrunt run -- run-all "$command" "$@"
 
     if [ $? -eq 0 ]; then
         echo ""
