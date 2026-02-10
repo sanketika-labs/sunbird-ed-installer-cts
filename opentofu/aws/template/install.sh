@@ -108,8 +108,9 @@ function install_component() {
         $ed_values_flag \
         -f "images.yaml" \
         -f "global-resources.yaml" \
-        -f "../opentofu/aws/$environment/global-values.yaml" \
-        -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/aws/$environment/global-values.yaml" --timeout 30m --debug
+
+        # -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {
@@ -313,7 +314,7 @@ function check_pod_status() {
 }
 
 RELEASE="release700"
-POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/${POSTMAN_COLLECTION_ID}"
+POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/234567-7899876-5f997"
 
 if [ $# -eq 0 ]; then
     create_tf_backend
