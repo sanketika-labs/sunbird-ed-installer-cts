@@ -1,0 +1,145 @@
+version: 0.2
+
+env:
+  variables:
+    # TF_LOG: "INFO"
+    TERRAGRUNT_TFPATH: "tofu"
+    TERRAGRUNT_ALLOW_INDIVIDUAL: "true"
+    Target_Env: "dev"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+      nodejs: 18
+    commands:
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - sudo ./aws/install --update
+      - aws --version
+      - wget https://github.com/opentofu/opentofu/releases/download/v1.11.2/tofu_1.11.2_linux_amd64.zip
+      - unzip -o tofu_1.11.2_linux_amd64.zip
+      - sudo mv tofu /usr/local/bin/
+      - sudo chmod +x /usr/local/bin/tofu
+      - tofu --version
+      - wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.97.0/terragrunt_linux_amd64
+      - chmod +x terragrunt_linux_amd64
+      - sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+      - terragrunt --version
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - sudo mv kubectl /usr/local/bin/
+      - kubectl version --client
+      - curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - helm version
+      - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      - sudo chmod +x /usr/bin/yq
+      - yq --version
+      - sudo npm install -g newman
+      - newman --version
+
+  pre_build:
+    commands:
+      - cd opentofu/aws
+      - cp -r template $Target_Env
+      - cd $Target_Env
+      # - chmod +x ./tg
+  build:
+    commands:
+      - echo "Phase 1 - Deploying independent modules"
+      - pwd
+      - cd network
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "network deployed successfully"
+      - cd storage
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "storage deployed successfully"
+      # - cd keys
+      # - terragrunt init -upgrade
+      # - terragrunt plan -out=tfplan
+      # - terragrunt apply --terragrunt-non-interactive
+      # - cd ..
+      # - echo "keys deployed successfully"
+      # - cd random_passwords
+      # - terragrunt init -upgrade
+      # - terragrunt plan -out=tfplan
+      # - terragrunt apply --terragrunt-non-interactive
+      # - cd ..
+      # - echo "random_passwords deployed successfully"
+      - echo "Phase 2 - Deploying EKS cluster"
+      - cd eks
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "EKS cluster deployed successfully"
+      - echo "Phase 3 - Deploying IAM roles"
+      - cd iam
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "IAM roles deployed successfully"
+      - echo "Phase 4 - Generating output files"
+      - cd output-file
+      - terragrunt init 
+      - terragrunt plan
+      - terragrunt apply -auto-approve
+      - cd ..
+      - echo "Output files generated successfully"
+      # - echo "Phase 5 - Uploading configuration files"
+      # - cd upload-files
+      # - terragrunt init -upgrade
+      # - terragrunt plan -out=tfplan
+      # - terragrunt apply --terragrunt-non-interactive
+      # - cd ..
+      # - echo "Configuration files uploaded successfully"
+      - echo "All infrastructure modules deployed successfully"
+
+  post_build:
+    commands:
+      # Configure kubectl for the cluster
+      # - cd eks
+      # - CLUSTER_NAME=$(terragrunt output -raw cluster_name 2>/dev/null || echo "sunbird-eks-cluster")
+      # - aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME
+      # - cd ..
+
+      # Verify cluster access
+      # - kubectl get nodes
+      
+      # Verify all modules deployed successfully
+      # - echo "Verifying infrastructure deployment"
+      #- cd network && terragrunt output && cd ..
+      # - cd storage && terragrunt output && cd ..
+      # - cd eks && terragrunt output && cd ..
+      # - cd iam && terragrunt output && cd ..
+      
+      # Generate global cloud values file
+      #- cd output-file && terragrunt output && cd ..
+      
+      # Optional: Deploy Helm charts
+      # - cd ../../../helmcharts
+      # - helm dependency update
+      # - helm install sunbird . --values values.yaml
+
+artifacts:
+  files:
+    - 'opentofu/aws/$Target_Env/global-cloud-values.yaml'
+    - 'opentofu/aws/$Target_Env/env.json'
+    - 'opentofu/aws/$Target_Env/*.tfplan'
+    - 'opentofu/aws/$Target_Env/**/*.tfstate'
+    - '**/*.log'
+  name: sunbird-infrastructure-artifacts
+  discard-paths: no
+
+cache:
+  paths:
+    - '/root/.cache/**/*'
+    - '/root/.terraform.d/**/*'
+    - 'opentofu/aws/$Target_Env/**/.terraform/**/*'
