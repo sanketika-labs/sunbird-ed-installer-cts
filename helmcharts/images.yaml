@@ -209,7 +209,7 @@ images:
 
   telemetry: &telemetry
     repository: "061051225269.dkr.ecr.us-east-1.amazonaws.com/lms_sb_sunbird-telemetry-service"
-    tag: "R1_TELEMETRY.040226-3"
+    tag: "R1_TELEMETRY.060226-4"
 
   nlweb: &nlweb
     repository: "sanketikahub/nlweb"
