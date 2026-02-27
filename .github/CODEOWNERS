@@ -1,0 +1,12 @@
+# Code owners for the repository.
+* @Cognizant-SPE/lms-pod4
+/cicd/** @Cognizant-SPE/lms-platform-team
+
+*/dev/.env* @Cognizant-SPE/lms-pod4
+*/apispec.json @Cognizant-SPE/lms-pod4
+
+*.yaml @Cognizant-SPE/lms-platform-team
+*.yml @Cognizant-SPE/lms-platform-team
+
+/.github/CODEOWNERS @Cognizant-SPE/lms-platform-team
+**/prod/** @Cognizant-SPE/lms-prod-deploy-approvers
