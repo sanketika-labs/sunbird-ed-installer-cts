@@ -196,40 +196,40 @@ confVolume: &confVolume
                 path: druid-report-processor.py
               - key: druid-report-submitter.py
                 path: druid-report-submitter.py
-        # - name: obsrvbb-user-cache-indexer-conf
-        #   configMap:
-        #     name: obsrvbb-etl-jobs
-        #     items:
-        #       - key: DialcodeRedisIndexer.conf
-        #         path: DialcodeRedisIndexer.conf
-        #       - key: DeviceProfile.conf
-        #         path: DeviceProfile.conf
-        #       - key: ESCloudUploader.conf
-        #         path: ESCloudUploader.conf
-        #       - key: ESContentIndexer.conf
-        #         path: ESContentIndexer.conf
-        #       - key: ESDialcodeIndexer.conf
-        #         path: ESDialcodeIndexer.conf
-        #       - key: application.conf
-        #         path: application.conf
-        #       - key: cassandraRedis.conf
-        #         path: cassandraRedis.conf
-        # - name: obsrvbb-user-cache-indexer-scripts
-        #   configMap:
-        #     name: obsrvbb-etl-jobs
-        #     items:
-        #       - key: DruidContentIndexer.sh
-        #         path: DruidContentIndexer.sh
-        #       - key: RedisContentIndexer.sh
-        #         path: RedisContentIndexer.sh
-        #       - key: RedisDialcodeIndexer.sh
-        #         path: RedisDialcodeIndexer.sh
-        #       - key: RedisUserDataIndexer.sh
-        #         path: RedisUserDataIndexer.sh
-        #       - key: DeviceProfileScripts.sh
-        #         path: DeviceProfileScripts.sh
-        #       - key: run-script.sh
-        #         path: run-script.sh
+        - name: obsrvbb-user-cache-indexer-conf
+          configMap:
+            name: obsrvbb-etl-jobs
+            items:
+              - key: DialcodeRedisIndexer.conf
+                path: DialcodeRedisIndexer.conf
+              - key: DeviceProfile.conf
+                path: DeviceProfile.conf
+              - key: ESCloudUploader.conf
+                path: ESCloudUploader.conf
+              - key: ESContentIndexer.conf
+                path: ESContentIndexer.conf
+              - key: ESDialcodeIndexer.conf
+                path: ESDialcodeIndexer.conf
+              - key: application.conf
+                path: application.conf
+              - key: cassandraRedis.conf
+                path: cassandraRedis.conf
+        - name: obsrvbb-user-cache-indexer-scripts
+          configMap:
+            name: obsrvbb-etl-jobs
+            items:
+              - key: DruidContentIndexer.sh
+                path: DruidContentIndexer.sh
+              - key: RedisContentIndexer.sh
+                path: RedisContentIndexer.sh
+              - key: RedisDialcodeIndexer.sh
+                path: RedisDialcodeIndexer.sh
+              - key: RedisUserDataIndexer.sh
+                path: RedisUserDataIndexer.sh
+              - key: DeviceProfileScripts.sh
+                path: DeviceProfileScripts.sh
+              - key: run-script.sh
+                path: run-script.sh
 
         - name: spark-conf
           configMap:
