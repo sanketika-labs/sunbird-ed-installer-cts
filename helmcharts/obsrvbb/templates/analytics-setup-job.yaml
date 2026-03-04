@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: obsrvbb-analytics-setup
+  namespace: spark
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: spark-master-tmp-spark-master-0
+        - name: obsrvbb-dataproducts
+          configMap:
+            name: obsrvbb-dataproducts
+        - name: spark-conf
+          configMap:
+            name: spark-conf
+      initContainers:
+      - name: analytics-init
+        image: alpine:latest
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          apk add --no-cache curl unzip tar
+          data_path="/data/analytics"
+          mkdir -p $data_path
+          
+          # Download files
+          curl -o $data_path/content-snapshot.zip "{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{ .Values.global.release_version }}/content-snapshot.zip"
+          curl -o $data_path/spark-3.1.3-bin-hadoop2.7.tgz "{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{ .Values.global.release_version }}/spark-3.1.3-bin-hadoop2.7.tgz"
+          curl -o $data_path/sunbird-obsrv-1.0-bkp-v3.zip "{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{ .Values.global.release_version }}/sunbird-obsrv-1.0-v3.zip"
+          curl -o $data_path/dataproducts.zip "{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{ .Values.global.release_version }}/dataproducts_artifacts_release-3.6.zip"
+          
+          # Extract files
+          unzip -o $data_path/content-snapshot.zip -d $data_path
+          tar -xf $data_path/spark-3.1.3-bin-hadoop2.7.tgz -C $data_path
+          unzip -o $data_path/sunbird-obsrv-1.0-bkp-v3.zip -d $data_path
+          cp -R $data_path/sunbird-obsrv-1.0-bkp/* $data_path/
+          unzip -o $data_path/dataproducts.zip -d $data_path
+          
+          # Download additional JARs
+          curl -o $data_path/models-2.0/data-products-1.0/lib/data-products-1.0.jar "{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{ .Values.global.release_version }}/data-products-1.0.jar"
+          
+          echo "Init container setup completed"
+      containers:
+      - name: analytics-setup
+        image: alpine:latest
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        - name: obsrvbb-dataproducts
+          mountPath: /data/analytics/scripts
+        - name: spark-conf
+          mountPath: /data/analytics/spark-conf
+        command:
+        - "/bin/sh"
+        - "-c"
+        - |
+          apk add --no-cache python3 py3-pip curl
+          data_path="/data/analytics"
+          
+          # Setup Python environment
+          python3 -m venv $data_path/venv
+          . $data_path/venv/bin/activate && pip install $data_path/dataproducts.tar.gz
+          deactivate
+          pip install kafka-python
+          
+          # Download Maven JARs
+          mkdir -p $data_path/content-snapshot/jars/etl-jobs-1.0/lib
+          mkdir -p $data_path/spark-3.1.3-bin-hadoop2.7/jars
+          mkdir -p $data_path/models-2.0/data-products-1.0/lib
+          
+          curl -o $data_path/content-snapshot/jars/etl-jobs-1.0/lib/guava-18.0.jar "https://repo1.maven.org/maven2/com/google/guava/guava/18.0/guava-18.0.jar"
+          curl -o $data_path/spark-3.1.3-bin-hadoop2.7/jars/jetty-util-6.1.26.jar "https://repo1.maven.org/maven2/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar"
+          curl -o $data_path/spark-3.1.3-bin-hadoop2.7/jars/config-1.3.3.jar "https://repo1.maven.org/maven2/com/typesafe/config/1.3.3/config-1.3.3.jar"
+          curl -o $data_path/spark-3.1.3-bin-hadoop2.7/jars/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
+          curl -o $data_path/content-snapshot/jars/etl-jobs-1.0/lib/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
+          curl -o $data_path/models-2.0/data-products-1.0/lib/google-cloud-storage-2.0.1.jar "https://repo1.maven.org/maven2/com/google/cloud/google-cloud-storage/2.0.1/google-cloud-storage-2.0.1.jar"
+          curl -o $data_path/models-2.0/data-products-1.0/lib/gcs-connector-hadoop2-2.0.1-shaded.jar "https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/hadoop2-2.0.1/gcs-connector-hadoop2-2.0.1-shaded.jar"
+          
+          # Copy and configure files
+          if [ -f "$data_path/models-2.0/data-products-1.0/lib/guava-19.0.jar" ]; then
+            cp "$data_path/models-2.0/data-products-1.0/lib/guava-19.0.jar" $data_path/spark-3.1.3-bin-hadoop2.7/jars/
+            rm -f $data_path/spark-3.1.3-bin-hadoop2.7/jars/guava-14.0.1.jar
+          fi
+          
+          # Copy configurations
+          cp /data/analytics/spark-conf/* $data_path/spark-3.1.3-bin-hadoop2.7/conf/ 2>/dev/null || true
+          
+          echo "Analytics setup completed"
