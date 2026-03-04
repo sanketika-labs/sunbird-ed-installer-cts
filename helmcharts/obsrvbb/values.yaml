@@ -160,10 +160,10 @@ confVolume: &confVolume
       extraVolumes:
         - name: data-volume
           persistentVolumeClaim:
-            claimName: spark-master-tmp-spark-master-0
-        # - name: log-directory
-        #   persistentVolumeClaim:
-        #     claimName: log-data-pvc
+            claimName: spark-data-pvc
+        - name: log-directory
+          persistentVolumeClaim:
+            claimName: log-data-pvc
         - name: obsrvbb-dataproducts
           configMap:
             name: obsrvbb-dataproducts
