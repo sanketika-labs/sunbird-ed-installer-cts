@@ -278,3 +278,4 @@ global:
   zookeeper: *zookeeper
   kafka: *kafka
   spark: *spark
+  druid: *druid
