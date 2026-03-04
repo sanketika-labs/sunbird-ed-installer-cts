@@ -37,8 +37,8 @@ get_report_job_model_name(){
 		;;
 		"progress-exhaust-v2") echo 'org.sunbird.analytics.exhaust.collection.ProgressExhaustJobV2'
 		;;
-		"cassandra-migration") echo 'org.sunbird.analytics.updater.CassandraMigratorJob'
-    ;;
+	# 	"cassandra-migration") echo 'org.sunbird.analytics.updater.CassandraMigratorJob'
+    # ;;
 		"collection-summary-report") echo 'org.sunbird.analytics.job.report.CollectionSummaryJob'
 		;;
 		"cf-summary-report") echo 'org.sunbird.analytics.job.report.CFSummaryReport'
