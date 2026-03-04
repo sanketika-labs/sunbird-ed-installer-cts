@@ -5,3 +5,6 @@ dependencies:
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
   version: 20.0.2
+- name: spark
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.3.2
