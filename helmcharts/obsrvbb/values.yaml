@@ -332,7 +332,7 @@ confVolume: &confVolume
               curl -o /data/analytics/models-2.0/data-products-1.0/data-products-1.0.jar "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/data-products-1.0.jar"
 
 spark: &spark
-  enabled: false  # Commented out - using existing spark in spark namespace
+  enabled: true
   nameOverride: "spark"
   fullnameOverride: "spark"
   image:
@@ -341,7 +341,7 @@ spark: &spark
     tag: 3.2.4_2
   serviceAccount:
     create: false  # Prevent Helm from creating a new service account
-    name: "" # The existing Kubernetes service account
+    name: "sunbird-sa" # The existing Kubernetes service account
   master:
       <<: *confVolume
       extraEnvVars:
