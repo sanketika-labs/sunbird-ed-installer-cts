@@ -23,8 +23,8 @@ lp_url: "http://learning:8080/learning-service"
 search:
     url: http://search-service:9000
     path: /v3/search
-cassandra_keyspace_prefix: '{{ .Values.global.env }}_'
-cassandra_hierarchy_store_prefix: "{{ .Values.global.env }}_"
+# cassandra_keyspace_prefix: '{{ .Values.global.env }}_'
+# cassandra_hierarchy_store_prefix: "{{ .Values.global.env }}_"
 spark:
   driver_memory: 7g
   memory_fraction: 0.3
@@ -47,7 +47,7 @@ channelSearchServiceEndpoint: "http://userorg-service:9000/v1/org/search"
 hierarchySearchServiceUrl: "http://content-service:9000/action/content"
 hierarchySearchServicEndpoint: /v3/hierarchy/
 stream_base_url: ""
-cassandra_hierarchy_store_keyspace: "{{ .Values.global.env }}_hierarchy_store"
+# cassandra_hierarchy_store_keyspace: "{{ .Values.global.env }}_hierarchy_store"
 assessment_metric_primary_category: "{{  .Values.exhaust_job_assessment_primary_category }}"
 exhaust_job_assessment_primary_category: "Practice Question Set"
 sunbird_userorg_service_url: "http://userorg-service:9000"
