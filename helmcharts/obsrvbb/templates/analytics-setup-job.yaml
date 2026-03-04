@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: spark-sa
       restartPolicy: OnFailure
       volumes:
         - name: data-volume
