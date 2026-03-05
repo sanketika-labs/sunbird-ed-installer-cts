@@ -52,7 +52,7 @@ global:
 
 # Storage configuration 
   public_container_name: "sb-dev-public"
-  object_storage_endpoint: "https://s3.us-east-1.amazonaws.com" # e.g., https://s3.us-east-1.amazonaws.com
+  object_storage_endpoint: "s3.us-east-1.amazonaws.com" # e.g., s3.us-east-1.amazonaws.com
   # vpc_id: "" # If create_network: false, provide existing VPC ID
   # private_subnet_ids: [] # If create_network: false
   # public_subnet_ids: []  # If create_network: false
