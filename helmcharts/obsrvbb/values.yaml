@@ -249,10 +249,10 @@ confVolume: &confVolume
           mountPath: /data/analytics/spark-conf
         - name: log-directory
           mountPath: /data/analytics/scripts/logs
-        - name: obsrvbb-user-cache-indexer-scripts
-          mountPath: /data/analytics/content-snapshot/scripts
-        - name: obsrvbb-user-cache-indexer-conf
-          mountPath: /data/analytics/content-snapshot/conf
+        # - name: obsrvbb-user-cache-indexer-scripts
+        #   mountPath: /data/analytics/content-snapshot/scripts
+        # - name: obsrvbb-user-cache-indexer-conf
+        #   mountPath: /data/analytics/content-snapshot/conf
 
       command:
           - "/bin/sh"
