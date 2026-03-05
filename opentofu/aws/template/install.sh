@@ -103,7 +103,7 @@ function install_component() {
             certificate_keys
         fi
     fi
-    helm dependency build $component
+    # helm dependency build $component
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         -f "images.yaml" \
