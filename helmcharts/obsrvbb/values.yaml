@@ -340,8 +340,10 @@ spark: &spark
     repository: spark
     tag: 3.2.4_2
   serviceAccount:
-    create: true  # Prevent Helm from creating a new service account
-    name: "sunbird-sa" # The existing Kubernetes service account
+    create: true
+    name: "sunbird-sa"
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::522814700227:role/sunbird_bucket_role"
   master:
       <<: *confVolume
       extraEnvVars:
