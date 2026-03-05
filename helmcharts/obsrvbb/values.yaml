@@ -340,7 +340,7 @@ spark: &spark
     repository: spark
     tag: 3.2.4_2
   serviceAccount:
-    create: false  # Prevent Helm from creating a new service account
+    create: true  # Prevent Helm from creating a new service account
     name: "sunbird-sa" # The existing Kubernetes service account
   master:
       <<: *confVolume
