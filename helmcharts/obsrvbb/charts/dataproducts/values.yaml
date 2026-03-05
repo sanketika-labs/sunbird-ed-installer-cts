@@ -100,9 +100,9 @@ analytics_cluster:
 jobmanager_logs_directory: "/data/analytics/logs/services"
 run_logs_directory: "/data/analytics/logs/data-products"
 
-blob_container_name: "{{ .Values.global.public_container_name }}/telemetry-data-store"
+blob_container_name: "{{ .Values.global.private_container_name }}/telemetry-data"
 cloud_storage_type: "azure"
-dp_raw_telemetry_backup_location: "unique/raw/"
+dp_raw_telemetry_backup_location: "unique/sb-telemetry/"
 cloud_storage_endpoint: https://{{ .Values.global.object_storage_endpoint }}
 
 
