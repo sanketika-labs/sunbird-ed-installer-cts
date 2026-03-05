@@ -51,6 +51,7 @@ global:
   create_network: "true"
 
 # Storage configuration 
+  storage_class: "gp3"
   public_container_name: "sb-dev-public"
   private_container_name: "sb-dev-private"
   object_storage_endpoint: "s3.us-east-1.amazonaws.com" # e.g., s3.us-east-1.amazonaws.com
