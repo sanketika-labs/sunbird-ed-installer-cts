@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 config() {
-	bucket="{{ .Values.global.public_container_name }}/telemetry-data-store"
+	bucket="{{ .Values.global.private_container_name }}/telemetry-data"
 	brokerList={{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}
 	zookeeper={{ .Values.global.zookeeper.host }}:{{ .Values.global.zookeeper.port }}
 	brokerIngestionList={{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}
