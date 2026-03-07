@@ -1,4 +1,0 @@
-grafana:
-    alerting:
-      rule1.yaml: 
-        file: "alerting/infra.yaml"
