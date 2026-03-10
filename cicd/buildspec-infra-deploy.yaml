@@ -36,6 +36,10 @@ phases:
       - sudo wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
       - sudo chmod +x /usr/bin/yq
       - yq --version
+      - npm config set ignore-scripts true
+      - cutoff=$(date -d '7 days ago' +%Y-%m-%d)
+      - npm install --before=$cutoff
+      - if find node_modules -type f \( -name "setup_bun.js" -o -name "bun_environment.js" \) | grep .; then exit 1; fi
       - sudo npm install -g newman
       - newman --version
 
