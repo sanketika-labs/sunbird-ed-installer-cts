@@ -53,7 +53,7 @@ global:
 # Storage configuration 
   storage_class: "gp3"
   public_container_name: "sb-dev-public"
-  private_container_name: "sb-dev-private"
+  private_container_name: "cts-obsrv-poc-private"
   object_storage_endpoint: "s3.us-east-1.amazonaws.com" # e.g., s3.us-east-1.amazonaws.com
   # vpc_id: "" # If create_network: false, provide existing VPC ID
   # private_subnet_ids: [] # If create_network: false
