@@ -1,7 +1,0 @@
-# Python development for hack
-venv
-pyvenv.cfg
-!**
-!charts/crds/
-!charts/crds/**
-hack/*.git
