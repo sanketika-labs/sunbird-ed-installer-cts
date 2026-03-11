@@ -341,9 +341,9 @@ spark: &spark
     tag: 3.2.4_2
   serviceAccount:
     create: true
-    name: "sunbird-sa-test"
+    name: "sunbird-sa"
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::725876873105:role/cts-eks-s3-read-role"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::522814700227:role/sunbird_bucket_role"
   master:
       <<: *confVolume
       extraEnvVars:
