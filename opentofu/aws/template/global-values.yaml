@@ -49,9 +49,11 @@ global:
   cloud_storage_region: "ap-south-1" # e.g., us-east-1
   # Network configuration (optional - set create_network: false if using existing VPC)
   create_network: "true"
-  # vpc_id: "" # If create_network: false, provide existing VPC ID
-  # private_subnet_ids: [] # If create_network: false
-  # public_subnet_ids: []  # If create_network: false
+  
+  storage_class: "gp3"
+  public_container_name: "ss-sb-sandbox-public"
+  private_container_name: "ss-sb-sandbox-private"
+  object_storage_endpoint: "s3.us-east-2.amazonaws.com"
 
   # EKS configuration
   eks_cluster_version: "1.33"

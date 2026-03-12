@@ -343,7 +343,7 @@ spark: &spark
     create: true
     name: "sunbird-sa"
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::522814700227:role/sunbird_bucket_role"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::885657071929:role/ss-sb-sandbox-sunbird-sa"
   master:
       <<: *confVolume
       extraEnvVars:
