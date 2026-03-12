@@ -81,9 +81,9 @@ function install_component() {
     
     local component="$1"
     kubectl create namespace sunbird 2>/dev/null || true
-    kubectl create namespace velero 2>/dev/null || true
-    kubectl create namespace volume-autoscaler 2>/dev/null || true
-    kubectl create namespace nlweb 2>/dev/null || true
+    # kubectl create namespace velero 2>/dev/null || true
+    # kubectl create namespace volume-autoscaler 2>/dev/null || true
+    # kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -103,13 +103,14 @@ function install_component() {
             certificate_keys
         fi
     fi
-    
+    # helm dependency build $component
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         -f "images.yaml" \
         -f "global-resources.yaml" \
-        -f "../opentofu/aws/$environment/global-values.yaml" \
-        -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/aws/$environment/global-values.yaml" --timeout 30m --debug
+
+        # -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {

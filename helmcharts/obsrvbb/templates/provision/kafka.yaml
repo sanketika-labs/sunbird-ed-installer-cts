@@ -1,3 +1,4 @@
+{{- if .Values.kafka.enabled }}
 kind: Job
 apiVersion: batch/v1
 metadata:
