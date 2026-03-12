@@ -340,7 +340,7 @@ spark: &spark
     repository: spark
     tag: 3.2.4_2
   serviceAccount:
-    create: true
+    create: false
     name: "sunbird-sa"
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::885657071929:role/ss-sb-sandbox-sunbird-sa"
