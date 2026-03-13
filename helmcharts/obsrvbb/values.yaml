@@ -264,9 +264,9 @@ confVolume: &confVolume
             deactivate
             pip install kafka-python
             curl -o /data/analytics/content-snapshot/jars/etl-jobs-1.0/lib/guava-18.0.jar "https://repo1.maven.org/maven2/com/google/guava/guava/18.0/guava-18.0.jar"
-            curl -o /data/analytics/spark-3.1.3-bin-hadoop2.7/jars/jetty-util-6.1.26.jar "https://repo1.maven.org/maven2/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar"
-            curl -o /data/analytics/spark-3.1.3-bin-hadoop2.7/jars/config-1.3.3.jar "https://repo1.maven.org/maven2/com/typesafe/config/1.3.3/config-1.3.3.jar"
-            curl -o /data/analytics/spark-3.1.3-bin-hadoop2.7/jars/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
+            curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/jetty-util-6.1.26.jar "https://repo1.maven.org/maven2/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar"
+            curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/config-1.3.3.jar "https://repo1.maven.org/maven2/com/typesafe/config/1.3.3/config-1.3.3.jar"
+            curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
             curl -o /data/analytics/content-snapshot/jars/etl-jobs-1.0/lib/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
 
             # Download google-cloud-storage
@@ -274,10 +274,10 @@ confVolume: &confVolume
             # Download gcs-connector with shaded classifier
             curl -o /data/analytics/models-2.0/data-products-1.0/lib/gcs-connector-hadoop2-2.0.1-shaded.jar "https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/hadoop2-2.0.1/gcs-connector-hadoop2-2.0.1-shaded.jar"
             
-            cp "$data_path/models-2.0/data-products-1.0/lib/guava-19.0.jar" /data/analytics/spark-3.1.3-bin-hadoop2.7/jars/
-            rm /data/analytics/spark-3.1.3-bin-hadoop2.7/jars/guava-14.0.1.jar
-            cp /data/analytics/spark-conf/spark-defaults.conf /data/analytics/spark-3.1.3-bin-hadoop2.7/conf/
-            cp /data/analytics/spark-conf/spark-env.sh /data/analytics/spark-3.1.3-bin-hadoop2.7/conf/
+            cp "$data_path/models-2.0/data-products-1.0/lib/guava-19.0.jar" /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/
+            rm /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/guava-14.0.1.jar
+            cp /data/analytics/spark-conf/spark-defaults.conf /data/analytics/spark-3.1.3-bin-hadoop3.2/conf/
+            cp /data/analytics/spark-conf/spark-env.sh /data/analytics/spark-3.1.3-bin-hadoop3.2/conf/
             /opt/bitnami/scripts/spark/entrypoint.sh /opt/bitnami/scripts/spark/run.sh
 
       initContainers:
@@ -295,10 +295,10 @@ confVolume: &confVolume
               [[ -d $data_path ]] || mkdir -p $data_path
               # Download the ZIP file
               [[ -f $jar_location ]] || curl -o $data_path/content-snapshot.zip "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/content-snapshot.zip"
-              curl -o /data/analytics/spark-3.1.3-bin-hadoop2.7.tgz "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/spark-3.1.3-bin-hadoop2.7.tgz"
+              curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2.tgz "https://archive.apache.org/dist/spark/spark-3.1.3/spark-3.1.3-bin-hadoop3.2.tgz"
               unzip -o $jar_location -d $data_path
 
-              tar -xvf /data/analytics/spark-3.1.3-bin-hadoop2.7.tgz -C "/data/analytics"
+              tar -xvf /data/analytics/spark-3.1.3-bin-hadoop3.2.tgz -C "/data/analytics"
 
               #  dataproducts
               jar_location_sbob="$data_path/sunbird-obsrv-1.0-bkp-v3.zip"
@@ -386,7 +386,7 @@ global:
   spark: *spark
   keycloak_kid_keys_configmap: keycloak-kids-keys
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
-  spark_home: /data/analytics/spark-3.1.3-bin-hadoop2.7
+  spark_home: /data/analytics/spark-3.1.3-bin-hadoop3.2
 
 analytics:
   opa_enabled: true
