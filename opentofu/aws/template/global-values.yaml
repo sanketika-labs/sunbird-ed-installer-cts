@@ -37,8 +37,8 @@ kong:
 
 global:
   building_block: "sb" # Building block name
-  env: "dev" # Short environment name
-  environment: "dev" # Environment name (1-9 lowercase alphanumeric characters)
+  env: "sbx" # Short environment name
+  environment: "sbx" # Environment name (1-9 lowercase alphanumeric characters)
   release_version: "release-7.0.0"
   
   # AWS-specific configuration
@@ -57,8 +57,8 @@ global:
   eks_cluster_version: "1.33"
   eks_node_instance_type: "m6a.2xlarge"
   eks_node_disk_size_gb: 70
-  eks_node_count_min: 4
-  eks_node_count_max: 5
+  eks_node_count_min: 2
+  eks_node_count_max: 3
   # Database (optional - set create_database: false if using external DB)
   create_database: false
   external_db_host: ""
