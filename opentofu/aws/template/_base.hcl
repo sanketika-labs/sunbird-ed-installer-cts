@@ -32,7 +32,7 @@ generate "provider" {
 provider "aws" {
   region = "${local.aws_region}"
   assume_role {
-    role_arn     = "arn:aws:iam::${local.target_account}:role/lms-cross-account-codebuild-role"
+    role_arn     = "arn:aws:iam::${local.target_account}:role/cross-account-codebuild-role"
     session_name = "terragrunt-deployment"
   }
   default_tags {
