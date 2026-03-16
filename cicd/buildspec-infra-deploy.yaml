@@ -56,13 +56,13 @@ phases:
       - cd network
       - terragrunt init 
       - terragrunt plan
-     # - terragrunt apply -auto-approve
+      - terragrunt apply -auto-approve
       - cd ..
       - echo "network deployed successfully"
       - cd storage
       - terragrunt init 
       - terragrunt plan
-     # - terragrunt apply -auto-approve
+      - terragrunt apply -auto-approve
       - cd ..
       #- echo "storage deployed successfully"
       # - cd keys
@@ -81,14 +81,14 @@ phases:
       - cd eks
       - terragrunt init 
       - terragrunt plan
-     # - terragrunt apply -auto-approve
+      - terragrunt apply -auto-approve
       - cd ..
       - echo "EKS cluster deployed successfully"
       - echo "Phase 3 - Deploying IAM roles"
       - cd iam
       - terragrunt init 
       - terragrunt plan
-     # - terragrunt apply -auto-approve
+      - terragrunt apply -auto-approve
       - cd ..
       - echo "IAM roles deployed successfully"
       # - echo "Phase 4 - Generating output files"
