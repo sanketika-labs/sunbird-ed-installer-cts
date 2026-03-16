@@ -81,7 +81,7 @@ phases:
       - cd eks
       - terragrunt init 
       - terragrunt plan
-      # - terragrunt apply -auto-approve
+      - terragrunt apply -auto-approve
       - cd ..
       - echo "EKS cluster deployed successfully"
       - echo "Phase 3 - Deploying IAM roles"
