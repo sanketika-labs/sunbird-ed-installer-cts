@@ -90,6 +90,8 @@ resource "aws_eks_cluster" "cluster" {
     endpoint_private_access = false
   }
 
+  enabled_cluster_log_types = var.cloudwatch_enabled_log_types
+
   tags = merge(local.common_tags, { Name = local.cluster_name })
 
   depends_on = [
@@ -209,6 +211,61 @@ resource "aws_eks_addon" "ebs_csi" {
     module.ebs_csi_driver_irsa,
     aws_eks_cluster.cluster,
     aws_eks_node_group.default
+  ]
+}
+
+# -------------------------------
+# CloudWatch Observability (Container Insights)
+# -------------------------------
+
+resource "aws_iam_role" "cloudwatch_observability" {
+  count = var.enable_cloudwatch_observability ? 1 : 0
+
+  name = "${local.cluster_name}-cw-obs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.oidc.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:amazon-cloudwatch:cloudwatch-agent"
+            "${replace(aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = local.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_observability_policy" {
+  count      = var.enable_cloudwatch_observability ? 1 : 0
+  role       = aws_iam_role.cloudwatch_observability[0].name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_eks_addon" "cloudwatch_observability" {
+  count        = var.enable_cloudwatch_observability ? 1 : 0
+  cluster_name = aws_eks_cluster.cluster.name
+  addon_name   = "amazon-cloudwatch-observability"
+
+  service_account_role_arn    = aws_iam_role.cloudwatch_observability[0].arn
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  tags = local.common_tags
+
+  depends_on = [
+    aws_eks_cluster.cluster,
+    aws_eks_node_group.default,
+    aws_iam_role_policy_attachment.cloudwatch_observability_policy
   ]
 }
 
