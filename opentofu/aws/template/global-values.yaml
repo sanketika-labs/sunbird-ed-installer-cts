@@ -37,8 +37,8 @@ kong:
 
 global:
   building_block: "sb" # Building block name
-  env: "sbx" # Short environment name
-  environment: "sbx" # Environment name (1-9 lowercase alphanumeric characters)
+  env: "dev" # Short environment name
+  environment: "dev" # Environment name (1-9 lowercase alphanumeric characters)
   release_version: "release-7.0.0"
   
   # AWS-specific configuration
