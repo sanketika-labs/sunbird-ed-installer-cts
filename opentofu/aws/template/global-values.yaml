@@ -35,6 +35,13 @@ postgresql:
 kong:
   kong_pg_password: *postgresql-password
 
+spark: &spark
+  serviceAccount:
+    create: true
+    name: "sunbird-sa"
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::522814700227:role/sunbird_bucket_role"
+
 global:
   building_block: "sb" # Building block name
   env: "dev" # Short environment name
