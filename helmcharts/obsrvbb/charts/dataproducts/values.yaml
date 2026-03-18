@@ -79,7 +79,7 @@ spark_cluster_user_name: ""
 
 #model-config.sh
 analytics_job_queue_topic: "sunbirddev.analytics.job_queue"
-topic: "sunbirddev.telemetry.derived"
+topic: "ingest"
 analytics_metrics_topic: "sunbirddev.analytics_metrics"
 sink_topic: "sunbirddev.telemetry.sink"
 metrics_topic: "sunbirddev.telemetry.metrics"
