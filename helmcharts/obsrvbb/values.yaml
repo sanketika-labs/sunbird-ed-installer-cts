@@ -178,8 +178,8 @@ confVolume: &confVolume
               #   path: submit-job.sh
               - key: model-config.sh
                 path: model-config.sh
-              - key: replay-updater.sh
-                path: replay-updater.sh
+              # - key: replay-updater.sh
+              #   path: replay-updater.sh
               # - key: sourcing-ingestion-spec.json
               #   path: sourcing-ingestion-spec.json
               # - key: submit-script.sh
