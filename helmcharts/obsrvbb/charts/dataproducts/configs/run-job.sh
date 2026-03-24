@@ -23,7 +23,7 @@ nohup $SPARK_HOME/bin/spark-submit \
 --conf spark.jars.ivy=/tmp/.ivy \
 --conf spark.driver.extraJavaOptions='-Dconfig.file=/data/analytics/scripts/common.conf' \
 --master 'local[*]' \
---jars $MODELS_HOME/analytics-framework-2.0.jar,$MODELS_HOME/scruid_2.12-2.5.0.jar,$MODELS_HOME/batch-models-2.0.jar \
+--jars $MODELS_HOME/analytics-framework-2.0.jar,$MODELS_HOME/batch-models-2.0.jar \
 --class org.ekstep.analytics.job.JobExecutor \
 $MODELS_HOME/batch-models-2.0.jar --model "$job_id" --config "$job_config$batchIds" \
 >> "$DP_LOGS/$today-job-execution.log" 2>&1
