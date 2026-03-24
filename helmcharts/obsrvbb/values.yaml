@@ -299,7 +299,7 @@ confVolume: &confVolume
 
               #  dataproducts
               jar_location_sbob="$data_path/sunbird-obsrv-1.0-v3.zip"
-              extracted_location="$data_path/sunbird-obsrv-1.0-bkp"
+              extracted_location="$data_path/sunbird-obsrv-1.0-v3/sunbird-obsrv-1.0-bkp"
 
               # Download the ZIP file if it doesn't exist
               [[ -f $jar_location_sbob ]] || curl -o $jar_location_sbob "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/sunbird-obsrv-1.0-v3.zip"
@@ -308,6 +308,7 @@ confVolume: &confVolume
               unzip -o $jar_location_sbob -d $data_path
               cp -R "$extracted_location"/* "$data_path"
               rm "$jar_location_sbob"
+              rm "$extracted_location"
               ls $data_path
 
                # download data-products-1.0.jar from same location above 
