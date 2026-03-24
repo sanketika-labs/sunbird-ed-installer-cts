@@ -294,24 +294,17 @@ confVolume: &confVolume
               [[ -d $data_path ]] || mkdir -p $data_path
               # Download the ZIP file
               curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2.tgz "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/spark-3.1.3-bin-hadoop3.2.tgz"
-              unzip -o $jar_location -d $data_path
 
               tar -xvf /data/analytics/spark-3.1.3-bin-hadoop3.2.tgz -C "/data/analytics"
 
               #  dataproducts
               jar_location_sbob="$data_path/sunbird-obsrv-1.0-v3.zip"
-              extracted_location="$data_path/sunbird-obsrv-1.0-bkp"
-              # Create the target directory if it doesn't exist
-              [[ -d $data_path ]] || mkdir -p $data_path
 
               # Download the ZIP file if it doesn't exist
               [[ -f $jar_location_sbob ]] || curl -o $jar_location_sbob "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/artifacts-{{.Values.global.release_version}}/sunbird-obsrv-1.0-v3.zip"
 
-              # Extract the ZIP file if not already extracted
-              [[ -d $extracted_location ]] || unzip -o $jar_location_sbob -d $data_path
-
-              # Copy all files from the extracted directory to /data/analytics
-              cp -R "$extracted_location"/* "$data_path"
+              # Extract directly into $data_path (avoids assuming the top-level folder name inside the zip)
+              unzip -o $jar_location_sbob -d $data_path
               rm "$jar_location_sbob"
               ls $data_path
 
