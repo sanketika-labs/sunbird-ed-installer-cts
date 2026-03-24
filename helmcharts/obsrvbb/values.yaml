@@ -269,9 +269,13 @@ confVolume: &confVolume
       initContainers:
         - name: analytics
           image: amazon/aws-cli
+          securityContext:
+            runAsUser: 0
           env:
             - name: AWS_DEFAULT_REGION
               value: "{{ .Values.global.cloud_storage_region }}"
+            - name: HOME
+              value: "/tmp"
           volumeMounts:
           - name: data-volume
             mountPath: /data
@@ -279,7 +283,7 @@ confVolume: &confVolume
             - "/bin/sh"
             - "-c"
             - |
-              dnf install -y unzip
+              dnf install -y unzip tar
               data_path="/data/analytics" # persistent path
               [[ -d $data_path ]] || mkdir -p $data_path
               # Download spark tarball
