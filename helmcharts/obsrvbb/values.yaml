@@ -308,7 +308,7 @@ confVolume: &confVolume
               unzip -o $jar_location_sbob -d $data_path
               cp -R "$extracted_location"/* "$data_path"
               rm "$jar_location_sbob"
-              rm "$extracted_location"
+              rm -rf "$extracted_location"
               ls $data_path
 
                # download data-products-1.0.jar from same location above 
