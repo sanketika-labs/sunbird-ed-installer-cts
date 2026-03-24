@@ -283,7 +283,7 @@ confVolume: &confVolume
             - "/bin/sh"
             - "-c"
             - |
-              dnf install -y unzip tar
+              dnf install -y unzip tar gzip
               data_path="/data/analytics" # persistent path
               [[ -d $data_path ]] || mkdir -p $data_path
               # Download spark tarball
