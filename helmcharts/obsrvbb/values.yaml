@@ -299,7 +299,7 @@ confVolume: &confVolume
               tar -xvf /data/analytics/spark-3.1.3-bin-hadoop3.2.tgz -C "/data/analytics"
 
               #  dataproducts
-              jar_location_sbob="$data_path/sunbird-obsrv-1.0-bkp-v3.zip"
+              jar_location_sbob="$data_path/sunbird-obsrv-1.0-v3.zip"
               extracted_location="$data_path/sunbird-obsrv-1.0-bkp"
               # Create the target directory if it doesn't exist
               [[ -d $data_path ]] || mkdir -p $data_path
