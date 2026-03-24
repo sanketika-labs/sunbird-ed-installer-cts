@@ -294,7 +294,7 @@ confVolume: &confVolume
               unzip -o $jar_location_sbob -d $data_path
               cp -R "$extracted_location"/* "$data_path"
               rm "$jar_location_sbob"
-              rm -rf "$extracted_location"
+              rm -rf "$data_path/sunbird-obsrv-1.0-v3"
               ls $data_path
 
 spark: &spark
