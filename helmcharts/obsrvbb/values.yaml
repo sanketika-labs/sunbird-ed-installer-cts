@@ -258,24 +258,10 @@ confVolume: &confVolume
           - "/bin/sh"
           - "-c"
           - |
-            data_path="/data/analytics" # persistent path
-            python -m venv /data/analytics/venv  # run dataproducts.tar.gz
-            . /data/analytics/venv/bin/activate && pip install /data/analytics/dataproducts.tar.gz 
-            deactivate
-            pip install kafka-python
             curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/jetty-util-6.1.26.jar "https://repo1.maven.org/maven2/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar"
             curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/config-1.3.3.jar "https://repo1.maven.org/maven2/com/typesafe/config/1.3.3/config-1.3.3.jar"
             curl -o /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/spark-sql_2.12-3.1.0-tests.jar "https://repo1.maven.org/maven2/org/apache/spark/spark-sql_2.12/3.1.0/spark-sql_2.12-3.1.0-tests.jar"
                        
-            rm /data/analytics/spark-3.1.3-bin-hadoop3.2/jars/guava-14.0.1.jar
-            rm 
-            rm /data/analytics/models-2.0/data-products-1.0/lib/jackson-annotations-2.10.0.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-core-2.10.0.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-databind-2.7.8.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-datatype-jdk8-2.8.9.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-datatype-jsr310-2.8.9.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-jaxrs-1.9.13.jar \
-                /data/analytics/models-2.0/data-products-1.0/lib/jackson-xc-1.9.13.jar
             cp /data/analytics/spark-conf/spark-defaults.conf /data/analytics/spark-3.1.3-bin-hadoop3.2/conf/
             cp /data/analytics/spark-conf/spark-env.sh /data/analytics/spark-3.1.3-bin-hadoop3.2/conf/
             /opt/bitnami/scripts/spark/entrypoint.sh /opt/bitnami/scripts/spark/run.sh
