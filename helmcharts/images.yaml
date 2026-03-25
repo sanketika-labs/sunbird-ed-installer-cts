@@ -477,10 +477,11 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  spark:
-    image: *spark
-    imagePullSecrets:
-      - name: "registry-secret-name"     
+  global:
+    spark:
+      image: *spark
+      imagePullSecrets:
+        - name: "registry-secret-name"     
 
 # Merge internal into root for direct access
 <<: *internal
