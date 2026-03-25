@@ -221,8 +221,9 @@ images:
 
   spark: &spark
     image:
-      registry: sunbirded.azurecr.io
-      repository: spark  
+      registry: bitnamilegacy
+      repository: spark
+      tag: 3.2.4-debian-12-r21 
 
 # Internal block with pull secrets
 internal: &internal
